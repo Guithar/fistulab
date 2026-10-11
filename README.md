@@ -2,7 +2,7 @@
 
 # Fistulab · Simulador de punción ecoguiada de la FAV
 
-[![Publicación](https://github.com/Guithar/ecografo-virtual/actions/workflows/deploy.yml/badge.svg)](https://github.com/Guithar/ecografo-virtual/actions/workflows/deploy.yml)
+[![Publicación](https://github.com/Guithar/fistulab/actions/workflows/deploy.yml/badge.svg)](https://github.com/Guithar/fistulab/actions/workflows/deploy.yml)
 [![fistulab.com](https://img.shields.io/badge/web-fistulab.com-3fc1c9)](https://fistulab.com)
 [![Licencia MIT](https://img.shields.io/badge/licencia-MIT-8ba0b2)](LICENSE)
 [![Apoya en Ko-fi](https://img.shields.io/badge/Ko--fi-apoya_el_proyecto-FF5E5B?logo=kofi&logoColor=white)](https://ko-fi.com/fistulab)
@@ -205,7 +205,7 @@ Configuración necesaria una sola vez:
 
    No cambies los servidores de nombres a los de Banahosting: la web dejaría de apuntar a GitHub Pages.
 
-4. *Settings → Pages → Custom domain*: `fistulab.com`. Cuando GitHub compruebe el DNS y emita el certificado, marca **Enforce HTTPS**. `www.fistulab.com` y la dirección antigua (`guithar.github.io/ecografo-virtual`) redirigen solas a `https://fistulab.com`.
+4. *Settings → Pages → Custom domain*: `fistulab.com`. Cuando GitHub compruebe el DNS y emita el certificado, marca **Enforce HTTPS**. `www.fistulab.com` y la dirección antigua (`guithar.github.io/fistulab`) redirigen solas a `https://fistulab.com`.
 5. Recomendado: verifica el dominio en la configuración de tu cuenta de GitHub (*Settings → Pages → Add a domain*, con un registro TXT). Así nadie más puede usarlo en GitHub Pages.
 
 Con *Actions* como origen no hace falta archivo `CNAME`: el dominio se guarda en la configuración del repositorio.
@@ -279,4 +279,4 @@ Fistulab es gratuito y lo seguirá siendo. Si te resulta útil para formar a tu 
 
 ## Licencia
 
-MIT. Se agradecen contribuciones clínicas y técnicas: casos nuevos, validación de valores y traducciones. Escribe en [Issues](https://github.com/Guithar/ecografo-virtual/issues) o a **[hola@fistulab.com](mailto:hola@fistulab.com)**.
+MIT. Se agradecen contribuciones clínicas y técnicas: casos nuevos, validación de valores y traducciones. Escribe en [Issues](https://github.com/Guithar/fistulab/issues) o a **[hola@fistulab.com](mailto:hola@fistulab.com)**.

@@ -12,8 +12,8 @@ export const SITE = {
   host: 'fistulab.com',
   email: 'hola@fistulab.com',
   kofi: 'https://ko-fi.com/fistulab',
-  repo: 'https://github.com/Guithar/ecografo-virtual',
-  docs: 'https://github.com/Guithar/ecografo-virtual/blob/main/docs/',
+  repo: 'https://github.com/Guithar/fistulab',
+  docs: 'https://github.com/Guithar/fistulab/blob/main/docs/',
 } as const;
 
 export const BUILD = {

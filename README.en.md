@@ -2,7 +2,7 @@
 
 # Fistulab · Ultrasound-guided AVF cannulation simulator
 
-[![Deploy](https://github.com/Guithar/ecografo-virtual/actions/workflows/deploy.yml/badge.svg)](https://github.com/Guithar/ecografo-virtual/actions/workflows/deploy.yml)
+[![Deploy](https://github.com/Guithar/fistulab/actions/workflows/deploy.yml/badge.svg)](https://github.com/Guithar/fistulab/actions/workflows/deploy.yml)
 [![fistulab.com](https://img.shields.io/badge/web-fistulab.com-3fc1c9)](https://fistulab.com/en/)
 [![MIT License](https://img.shields.io/badge/license-MIT-8ba0b2)](LICENSE)
 [![Support on Ko-fi](https://img.shields.io/badge/Ko--fi-support_the_project-FF5E5B?logo=kofi&logoColor=white)](https://ko-fi.com/fistulab)
@@ -205,7 +205,7 @@ One-time setup:
 
    Do not change the name servers to Banahosting's: the website would stop pointing to GitHub Pages.
 
-4. *Settings → Pages → Custom domain*: `fistulab.com`. Once GitHub has checked the DNS and issued the certificate, check **Enforce HTTPS**. `www.fistulab.com` and the old address (`guithar.github.io/ecografo-virtual`) redirect automatically to `https://fistulab.com`.
+4. *Settings → Pages → Custom domain*: `fistulab.com`. Once GitHub has checked the DNS and issued the certificate, check **Enforce HTTPS**. `www.fistulab.com` and the old address (`guithar.github.io/fistulab`) redirect automatically to `https://fistulab.com`.
 5. Recommended: verify the domain in your GitHub account settings (*Settings → Pages → Add a domain*, with a TXT record). That way no one else can use it on GitHub Pages.
 
 With *Actions* as the source, no `CNAME` file is needed: the domain is stored in the repository settings.
@@ -279,4 +279,4 @@ Fistulab is free and will remain so. If you find it useful for training your uni
 
 ## License
 
-MIT. Clinical and technical contributions are welcome: new cases, validation of values, and translations. Open an [issue](https://github.com/Guithar/ecografo-virtual/issues) or write to **[hola@fistulab.com](mailto:hola@fistulab.com)**.
+MIT. Clinical and technical contributions are welcome: new cases, validation of values, and translations. Open an [issue](https://github.com/Guithar/fistulab/issues) or write to **[hola@fistulab.com](mailto:hola@fistulab.com)**.

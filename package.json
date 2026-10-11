@@ -6,10 +6,10 @@
   "homepage": "https://fistulab.com",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Guithar/ecografo-virtual.git"
+    "url": "git+https://github.com/Guithar/fistulab.git"
   },
   "bugs": {
-    "url": "https://github.com/Guithar/ecografo-virtual/issues"
+    "url": "https://github.com/Guithar/fistulab/issues"
   },
   "funding": {
     "type": "ko-fi",
