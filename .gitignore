@@ -4,3 +4,9 @@ dist-single/
 *.log
 .DS_Store
 tests/screens/
+# configuración local de Claude Code (permisos y worktrees): nunca al repositorio
+.claude/settings.local.json
+.claude/worktrees/
+# variables de entorno y credenciales locales
+.env
+.env.*
