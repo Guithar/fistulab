@@ -190,7 +190,7 @@ Las rutas siguen el patrón actual.
 | # | P | Título de trabajo | Ruta ES · EN | Intención | Practicar en el simulador |
 |---|---|---|---|---|---|
 | A1 | P1 | Exploración física de la FAV: frémito, soplo, elevación del brazo y aumento del pulso | `guias/exploracion-fisica-fav/` · `en/guides/av-fistula-physical-exam/` | Informativa (enfermería, técnicos, exámenes) | `?caso=rc_estenosis`, `?caso=rc_madura` |
-| A2 | P1 | Tipos de fístula arteriovenosa: radiocefálica, braquiocefálica, braquiobasílica y prótesis (con 3D) | `guias/tipos-fistula-arteriovenosa/` · `en/guides/types-of-av-fistula/` | Informativa amplia (estudiantes, pacientes, enfermería) | `rc_madura`, `bc_obeso`, `bb_transpuesta`, `ptfe_asa` |
+| A2 | P1 · **publicada** | Tipos de fístula arteriovenosa: radiocefálica, braquiocefálica, braquiobasílica y prótesis (con 3D) | `guias/tipos-fistula-arteriovenosa/` · `en/guides/types-of-av-fistula/` | Informativa amplia (estudiantes, pacientes, enfermería) | `rc_madura`, `bc_obeso`, `bb_transpuesta`, `ptfe_asa` |
 | A3 | P2 | Mapeo vascular con ecografía antes de la FAV | `guias/mapeo-vascular-ecografia/` · `en/guides/vein-mapping-ultrasound/` | Profesional (nefrología, cirugía, enfermería de ERCA) | `?caso=normal&modo=explore` |
 | A4 | P3 | FAV, prótesis o catéter: cómo se elige el acceso vascular | `guias/fav-protesis-o-cateter/` · `en/guides/fistula-vs-graft-vs-catheter/` | Informativa (estudiantes, pacientes) | — |
 
