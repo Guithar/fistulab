@@ -19,6 +19,7 @@ export const GUIDES: PagePair[] = [
   { es: 'guias/tipos-fistula-arteriovenosa/', en: 'en/guides/types-of-av-fistula/' },
   { es: 'guias/tecnica-puncion-fav/', en: 'en/guides/avf-cannulation-technique/' },
   { es: 'guias/puncion-ecoguiada-fav/', en: 'en/guides/ultrasound-guided-fistula-cannulation/' },
+  { es: 'guias/puncion-dificil-fav/', en: 'en/guides/difficult-fistula-cannulation/' },
   { es: 'guias/angulo-agujas-puncion-fav/', en: 'en/guides/avf-needle-angle-and-gauge/' },
   { es: 'guias/regla-de-los-6-maduracion-fav/', en: 'en/guides/rule-of-6s-fistula-maturation/' },
   { es: 'guias/ecografia-doppler-fav/', en: 'en/guides/av-fistula-doppler-ultrasound/' },

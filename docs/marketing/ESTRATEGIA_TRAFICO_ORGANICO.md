@@ -211,7 +211,7 @@ Las rutas siguen el patrón actual.
 
 | # | P | Título de trabajo | Ruta ES · EN | Intención | Practicar |
 |---|---|---|---|---|---|
-| C1 | P1 | Punción difícil: FAV profunda, tortuosa, con colaterales o calcificada | `guias/puncion-dificil-fav/` · `en/guides/difficult-fistula-cannulation/` | Profesional, **la ventaja diferencial de Fistulab** | `bc_obeso`, `rc_tortuosa`, `rc_colaterales`, `rc_calcificada` |
+| C1 | P1 · **publicada** | Punción difícil: FAV profunda, tortuosa, con colaterales o calcificada | `guias/puncion-dificil-fav/` · `en/guides/difficult-fistula-cannulation/` | Profesional, **la ventaja diferencial de Fistulab** | `bc_obeso`, `rc_tortuosa`, `rc_colaterales`, `rc_calcificada` |
 | C2 | P1 | Punción de la prótesis de PTFE | `guias/puncion-protesis-ptfe/` · `en/guides/av-graft-cannulation/` | Profesional (resultados casi vacíos: patentes y fabricante) | `?caso=ptfe_asa&modo=cannulate` |
 | C3 | P2 | Dolor en la punción de la FAV: anestesia tópica, técnica y comunicación | `guias/dolor-puncion-fav/` · `en/guides/fistula-cannulation-pain/` | Mixta (pacientes y enfermería) | — |
 | C4 | P2 | Autopunción en hemodiálisis domiciliaria: cómo se aprende | `guias/autopuncion-hemodialisis-domiciliaria/` · `en/guides/self-cannulation-home-hemodialysis/` | Pacientes de hemodiálisis domiciliaria y quienes los forman | `?caso=rc_madura` |
