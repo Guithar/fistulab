@@ -2,7 +2,7 @@
 
 ## Sin publicar
 
-- **Guías** en <https://fistulab.com/guias/> y <https://fistulab.com/en/guides/>: tipos de FAV (radiocefálica, humerocefálica, humerobasílica, prótesis y FAV endovascular), técnica de punción, punción ecoguiada, punción difícil (FAV profunda, tortuosa, con colaterales, calcificada o tras un hematoma), agujas, regla de los 6 y maduración, Doppler (Qa y estenosis), punción en escalera, área y ojal, infiltración y aneurisma, con referencias y enlaces a los casos del simulador. Páginas de lectura sin JavaScript, enlazadas desde la ayuda y desde «Más» en el móvil.
+- **Guías** en <https://fistulab.com/guias/> y <https://fistulab.com/en/guides/>: tipos de FAV (radiocefálica, humerocefálica, humerobasílica, prótesis y FAV endovascular), técnica de punción, punción ecoguiada, punción difícil (FAV profunda, tortuosa, con colaterales, calcificada o tras un hematoma), primeras punciones de una FAV nueva, agujas, regla de los 6 y maduración, Doppler (Qa y estenosis), punción en escalera, área y ojal, infiltración, aneurisma y vía periférica ecoguiada (con la preservación de venas en la enfermedad renal), con referencias y enlaces a los casos del simulador. Páginas de lectura sin JavaScript, enlazadas desde la ayuda y desde «Más» en el móvil.
 - `?leccion=<id>` abre directamente una lección guiada.
 - **Revisión clínica** de los fundamentos:
   - la tabla de calibre según el flujo de bomba sigue ahora la de la NKF (17G 200–250 mL/min…);

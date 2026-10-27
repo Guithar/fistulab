@@ -319,8 +319,8 @@ Prioridad propuesta, integrada con el mapa anterior. Todas van en español y en 
 | 3 | Frémito y soplo: cómo saber si la fístula funciona / *Fistula bruit and thrill* | Pacientes | Versión para pacientes de A1 (exploración física, para profesionales) | `rc_madura`, `rc_estenosis` |
 | 4 | Catéter o fístula para hemodiálisis / *Fistula vs catheter (and graft)* | Pacientes | A4 | — |
 | 5 | Estenosis y trombosis: señales de alarma / *AV fistula stenosis and clotting* | Pacientes | Versión para pacientes de B1 y B2 | `rc_estenosis`, lección `doppler-fav` |
-| 6 | Punción venosa periférica ecoguiada (solo ES al principio) | Profesionales | D3 ampliada; responde a «punción ecoguiada», en la posición 68 | caso `normal`, lecciones `eje-corto`, `eje-largo`, `arteria-vena` |
-| 7 | Primeras punciones de una FAV nueva / *First cannulation of a new fistula* | Profesionales | Antes era «ampliar la sección 7 de *Técnica*»; ahora, página propia | `rc_madura`, `rc_inmadura` |
+| 6 · **publicada** | Punción venosa periférica ecoguiada (en los dos idiomas, porque el sitio publica siempre en pares) | Profesionales | D3 ampliada; responde a «punción ecoguiada», en la posición 68 | caso `normal`, lecciones `eje-corto`, `eje-largo`, `arteria-vena` |
+| 7 · **publicada** | Primeras punciones de una FAV nueva / *First cannulation of a new fistula* | Profesionales | Antes era «ampliar la sección 7 de *Técnica*»; ahora, página propia | `rc_madura`, `rc_inmadura` |
 | 8 | Ojal en hemodiálisis domiciliaria (primero EN) | Pacientes | C4 | `rc_madura` |
 | 9 | Mapeo venoso antes de la cirugía / *Vein mapping before AVF surgery* | Mixto | A3 | caso `normal` |
 | 10 | Página pilar: qué es una FAV / *What is an AV fistula* | Pacientes | Complementa a A2 (*Tipos de FAV*) | `rc_madura`, `ptfe_asa`, `bb_transpuesta` |
