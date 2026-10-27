@@ -326,6 +326,37 @@ Prioridad propuesta, integrada con el mapa anterior. Todas van en español y en 
 | 10 | Página pilar: qué es una FAV / *What is an AV fistula* | Pacientes | Complementa a A2 (*Tipos de FAV*) | `rc_madura`, `ptfe_asa`, `bb_transpuesta` |
 | — | Hematoma tras la diálisis | — | No se crea: se amplía la guía de infiltración | — |
 
+**Volúmenes del Planificador de Google Ads (28 de octubre de 2026, de octubre de 2025 a septiembre de 2026).** Son tramos, no cifras: la cuenta no gasta.
+
+| Ámbito | Resultado |
+|---|---|
+| España | 15 de 16 palabras sin datos; solo «cuidados de la fístula arteriovenosa» da 10–100 al mes |
+| EE. UU. y Reino Unido | 6 palabras en 10–100; el resto, sin datos |
+| Todo el mundo, 100–1.000 | «av fistula care», «fistula exercises», «buttonhole technique», «rule of 6s fistula», «antegrade vs retrograde cannulation» (esta última, al alza en el último trimestre) |
+| Todo el mundo, 10–100 | «avf cannulation angle» |
+
+El Planificador se queda corto en este nicho: «fistula infiltration» sale sin datos y en Search Console ya suma unas 150 impresiones. Sirve para ordenar, no para descartar.
+
+**Orden actualizado:**
+1. Cuidados de la FAV.
+2. Ejercicios.
+3. *Buttonhole*, primero en inglés.
+4. Frémito y soplo.
+5. Catéter o fístula.
+6. Estenosis y trombosis.
+7. Primeras punciones (**publicada**).
+8. Mapeo venoso.
+9. Vía periférica ecoguiada (**publicada**).
+10. Pilar «Qué es una FAV».
+11. Hematoma, como ampliación de la guía de infiltración.
+
+Solo del 1 al 3 hay volumen medido. Los tres primeros, salvo el *buttonhole* para profesionales, esperan a la autoría con nombre.
+
+**Mejoras hechas a las guías que ya cubren búsquedas de 100–1.000 (28 de octubre):**
+- **Regla de los 6** (ES/EN): tabla «los cuatro seis» y dos preguntas frecuentes («¿Se sigue usando?» y «¿Vale para las prótesis?»).
+- **Agujas** (ES/EN): tabla de anterógrada frente a retrógrada y la pregunta «¿Es mejor la punción arterial anterógrada o retrógrada?». La de la aguja venosa ya estaba.
+- ***Buttonhole* (EN):** título «Buttonhole technique vs rope ladder and area cannulation» y un apartado explícito sobre cómo se crea el túnel (también en ES).
+
 **Requisitos para todo el contenido médico** (de obligado cumplimiento antes de publicar los artículos para pacientes):
 
 - **Autoría y revisión clínica con nombre y titulación,** como `Person` y `reviewedBy` en los datos estructurados, más una página «Comité de revisión». **Pendiente de que Alberto diga quién firma.**
