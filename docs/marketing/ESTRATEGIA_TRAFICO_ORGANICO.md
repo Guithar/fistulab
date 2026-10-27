@@ -5,7 +5,7 @@ Estudio estratégico para atraer público y usuarios de forma orgánica: conteni
 *Fecha: 25 de octubre de 2026. El sitio se lanzó el 7 de octubre de 2026.*
 
 > **Limitaciones de este estudio.**
-> - **Search Console:** no tuve acceso. No hay conector ni credenciales de Google en el entorno de trabajo, y tampoco encontré exportaciones en Drive ni correos de Search Console. El apartado 2 explica qué revisar y cómo; si exportas los informes, los analizo.
+> - **Search Console:** al redactar el estudio no tuve acceso. El 27 de octubre llegaron los primeros datos, desde otra sesión con acceso a la propiedad; están en el apartado 2.0.
 > - **Volúmenes de búsqueda:** el estudio no los incluye. La prioridad de cada tema se basa en lo que muestran los resultados de búsqueda reales: quién posiciona y con qué formato. También pesan el tamaño de cada audiencia y el encaje con el simulador. Cuando haya datos de Search Console, se recalibran.
 > - **Verificación de directorios, comunidades y fechas:** proceden de búsquedas web hechas el 25 de octubre de 2026. Casi ningún sitio se pudo abrir directamente. Lo marcado como «sin verificar» hay que confirmarlo antes de actuar, y lo mismo vale para cualquier plazo de envío.
 
@@ -17,7 +17,7 @@ Estudio estratégico para atraer público y usuarios de forma orgánica: conteni
    - En español, las búsquedas sobre punción de la FAV las ocupan PDFs: manuales de SEDEN, protocolos del SAS, Redalyc y repositorios universitarios. También aparecen artículos de divulgación (Portales Médicos) y apuntes de academias (SalusPlay).
    - En inglés dominan los resúmenes de estudios (IVTEAM, clinicaltrials.gov) y los PDFs de la NKF.
    - Casi nadie tiene guías HTML prácticas, actualizadas y con imagen. Las 16 guías de Fistulab ya son mejores que la mayor parte de lo que posiciona.
-2. **Fistulab todavía no aparece por su nombre en los buscadores.** En nuestras pruebas, el repositorio de GitHub sí aparece en búsquedas como «punción ecoguiada FAV» y la web todavía no. **Lo primero es comprobar la indexación en Search Console** (apartado 2.1).
+2. **Google ya muestra las guías, pero casi nadie hace clic.** Hasta el 27 de octubre hubo unas 510 impresiones y 3 clics. Dos guías en inglés (infiltración y agujas) están en el borde de la primera página, en las posiciones 9–11; ya les he ajustado el título y la descripción (apartado 2.0). En nuestras pruebas, el repositorio de GitHub también aparece en búsquedas como «punción ecoguiada FAV».
 3. **La gran ventaja es la imagen.** Ninguna guía tiene hoy una sola captura del simulador (0 imágenes `<img>`), y en YouTube no hay ningún vídeo que muestre la punción ecoguiada en plano explicada en 3D. Una misma sesión de grabación con el simulador puede dar un vídeo largo, cuatro clips cortos, varias capturas para las guías y GIFs para redes.
 4. **Contenidos: pasar de 8 a unos 25 temas por idioma en 6 meses**, en seis bloques:
    - valoración del acceso;
@@ -113,6 +113,37 @@ Las búsquedas de prueba muestran el mismo patrón en casi todos los temas:
 ---
 
 ## 2. Search Console: puesta a punto y rutina
+
+### 2.0 Línea base (datos del 27 de octubre de 2026)
+
+**Propiedad.** `sc-domain:fistulab.com`, de dominio, con permiso de propietario.
+
+**Sitemap.** 20 URL enviadas, último rastreo el 22 de octubre. El informe marca 0 indexadas, pero las páginas ya reciben impresiones, así que ese contador va con retraso. Las cuatro guías nuevas (tipos de FAV y punción difícil, en los dos idiomas) entrarán en el sitemap al publicar.
+
+**Rendimiento.** Unas 510 impresiones y 3 clics.
+
+| Página | Impresiones | Posición | Clics |
+|---|---|---|---|
+| `/en/guides/fistula-infiltration/` | 150 | 8,9 | 1 |
+| `/en/guides/avf-needle-angle-and-gauge/` | 148 | 10,7 | 0 |
+| `/guias/regla-de-los-6-maduracion-fav/` | 59 | 8,1 | 0 |
+| `/en/guides/av-fistula-doppler-ultrasound/` | 59 | 38 | 0 |
+| `/guias/puncion-ecoguiada-fav/` | 34 | 50 | 0 |
+
+| Consulta | Impresiones | Posición |
+|---|---|---|
+| «punción ecoguiada» | 23 | 68 |
+| «dialysis fistula infiltration» | 9 | 9 |
+| «infiltrated fistula» | 8 | 11 |
+
+**Lectura de los datos:**
+- Con tres semanas de vida y sin enlaces, el inglés recibe más impresiones que el español: el mercado de EE. UU. pesa.
+- Las dos guías en inglés en la posición 9–11 son la palanca más rápida. Ya están reescritos sus títulos y descripciones, pendientes de publicar:
+  - **infiltración:** «Infiltrated dialysis fistula: what to do, how to prevent it», que recoge las dos consultas reales;
+  - **agujas:** «Dialysis needle gauge and AV fistula cannulation angle», con las cifras clave en la descripción.
+- «Punción ecoguiada» en la posición 68 es una consulta genérica: también la buscan quienes canalizan vías periféricas o centrales. Se sube con enlaces y con la guía D3 («en plano o fuera de plano»), no retocando el título.
+- **URL con `?leccion=` y `?caso=`.** El simulador y su versión inglesa llevan una canónica fija a `https://fistulab.com/` y `https://fistulab.com/en/`, y el código no reescribe la URL. Por eso Google las agrupa en la portada. En Search Console saldrán como «página alternativa con etiqueta canónica adecuada»: es lo esperado y no hay que corregir nada. No conviene bloquearlas en `robots.txt`, porque Google dejaría de ver la canónica.
+- **Próxima revisión:** cuando las páginas lleven 4 semanas publicadas con los títulos nuevos. Hay que comparar el CTR y la posición de las dos guías en inglés y repetir el ajuste con «regla de los 6» si sigue en la posición 8 sin clics.
 
 ### 2.1 Esta semana
 
