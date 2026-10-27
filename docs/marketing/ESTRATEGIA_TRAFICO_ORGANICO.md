@@ -143,6 +143,15 @@ Las búsquedas de prueba muestran el mismo patrón en casi todos los temas:
   - **agujas:** «Dialysis needle gauge and AV fistula cannulation angle», con las cifras clave en la descripción.
 - «Punción ecoguiada» en la posición 68 es una consulta genérica: también la buscan quienes canalizan vías periféricas o centrales. Se sube con enlaces y con la guía D3 («en plano o fuera de plano»), no retocando el título.
 - **URL con `?leccion=` y `?caso=`.** El simulador y su versión inglesa llevan una canónica fija a `https://fistulab.com/` y `https://fistulab.com/en/`, y el código no reescribe la URL. Por eso Google las agrupa en la portada. En Search Console saldrán como «página alternativa con etiqueta canónica adecuada»: es lo esperado y no hay que corregir nada. No conviene bloquearlas en `robots.txt`, porque Google dejaría de ver la canónica.
+- **Segunda ronda (27 de octubre), a partir de la propuesta de la sesión de Directorios:**
+  - **infiltración (EN):** el título pasa a «Infiltrated fistula in dialysis: what to do, ice or heat». Se añade un cuadro de qué hacer en los primeros minutos, en la misma sesión y en los días siguientes, también en la versión en español;
+  - **agujas (EN):** el título pasa a «Dialysis needle size chart (14–17G) and cannulation angle». Se añade la pregunta «Is the venous needle placed antegrade or retrograde?» en los dos idiomas. La tabla de calibre y flujo ya seguía a la NKF;
+  - **regla de los 6 (ES):** «Regla de los 6 de la fístula: cuándo está madura», con las tres cifras en la descripción;
+  - **punción ecoguiada (ES):** «Punción ecoguiada de la fístula arteriovenosa paso a paso»;
+  - **Doppler (EN):** «AV fistula ultrasound: normal flow volume & stenosis».
+- **Pendiente en Search Console (lo hace Alberto):**
+  - pedir la indexación, URL a URL, de las guías en español sin impresiones (infiltración, aneurisma, técnica, escalera y ojal) y de las cuatro guías nuevas en cuanto se publiquen;
+  - comprobar en GitHub, en *Settings → Pages*, que está marcado *Enforce HTTPS*, porque Bing ve la portada con `http`.
 - **Próxima revisión:** cuando las páginas lleven 4 semanas publicadas con los títulos nuevos. Hay que comparar el CTR y la posición de las dos guías en inglés y repetir el ajuste con «regla de los 6» si sigue en la posición 8 sin clics.
 
 ### 2.1 Esta semana
@@ -296,6 +305,38 @@ Captan búsquedas de cola larga, como «fístula tortuosa punción», «fístula
 Brasil tiene uno de los mayores volúmenes de pacientes en diálisis del mundo y una comunidad de enfermería muy activa en Instagram. Casi no hay contenido en portugués sobre punción ecoguiada. Traducir las guías P1 y la interfaz abriría un mercado sin competencia.
 
 Exige trabajo de producto: hoy `tr()` solo admite dos idiomas. **Es una decisión, no una tarea** (apartado 13).
+
+#### I. Línea para pacientes (encargo del 27 de octubre)
+
+Alberto pidió buscar palabras clave y artículos con búsquedas reales para promover el sitio. La sesión de Directorios cruzó Search Console (3 meses), 4 búsquedas de resultados y el repositorio. **No hay volúmenes medidos**: Semrush no tenía unidades. Su conclusión es que hoy todo el contenido es para enfermería y no hay nada para pacientes, que es donde está el volumen de búsqueda.
+
+Prioridad propuesta, integrada con el mapa anterior. Todas van en español y en inglés salvo que se indique.
+
+| Prioridad | Artículo | Público | Relación con el mapa | Casos o lecciones |
+|---|---|---|---|---|
+| 1 | Cuidados de la FAV / *AV fistula care: a patient's guide* | Pacientes | Nueva | — |
+| 2 | Ejercicios para la fístula (pelota) / *Fistula exercises* | Pacientes | Nueva | `rc_inmadura`, lección `madurez` |
+| 3 | Frémito y soplo: cómo saber si la fístula funciona / *Fistula bruit and thrill* | Pacientes | Versión para pacientes de A1 (exploración física, para profesionales) | `rc_madura`, `rc_estenosis` |
+| 4 | Catéter o fístula para hemodiálisis / *Fistula vs catheter (and graft)* | Pacientes | A4 | — |
+| 5 | Estenosis y trombosis: señales de alarma / *AV fistula stenosis and clotting* | Pacientes | Versión para pacientes de B1 y B2 | `rc_estenosis`, lección `doppler-fav` |
+| 6 | Punción venosa periférica ecoguiada (solo ES al principio) | Profesionales | D3 ampliada; responde a «punción ecoguiada», en la posición 68 | caso `normal`, lecciones `eje-corto`, `eje-largo`, `arteria-vena` |
+| 7 | Primeras punciones de una FAV nueva / *First cannulation of a new fistula* | Profesionales | Antes era «ampliar la sección 7 de *Técnica*»; ahora, página propia | `rc_madura`, `rc_inmadura` |
+| 8 | Ojal en hemodiálisis domiciliaria (primero EN) | Pacientes | C4 | `rc_madura` |
+| 9 | Mapeo venoso antes de la cirugía / *Vein mapping before AVF surgery* | Mixto | A3 | caso `normal` |
+| 10 | Página pilar: qué es una FAV / *What is an AV fistula* | Pacientes | Complementa a A2 (*Tipos de FAV*) | `rc_madura`, `ptfe_asa`, `bb_transpuesta` |
+| — | Hematoma tras la diálisis | — | No se crea: se amplía la guía de infiltración | — |
+
+**Requisitos para todo el contenido médico** (de obligado cumplimiento antes de publicar los artículos para pacientes):
+
+- **Autoría y revisión clínica con nombre y titulación,** como `Person` y `reviewedBy` en los datos estructurados, más una página «Comité de revisión». **Pendiente de que Alberto diga quién firma.**
+- **Fuentes:** KDOQI 2019, GEMAV (SEN/SEDEN), EDTNA/ERCA y ESVS 2018.
+- **En los artículos para pacientes:**
+  - sin dosis;
+  - aviso de que no sustituyen a su equipo;
+  - un cuadro «Cuándo ir a urgencias»: la fístula no vibra, un sangrado que no para, fiebre o enrojecimiento, la mano fría o dolorosa.
+- **Etiqueta de público** («Para profesionales» o «Para pacientes») en la línea de fecha. Ya está en las 20 guías profesionales y en la plantilla.
+- **`dateModified` real** cuando cambia el contenido.
+- **El simulador** se presenta siempre como herramienta formativa, no como producto sanitario.
 
 ### 3.3 Contenido de temporada
 
