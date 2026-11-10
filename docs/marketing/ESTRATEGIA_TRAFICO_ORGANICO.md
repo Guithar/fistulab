@@ -154,6 +154,44 @@ Las búsquedas de prueba muestran el mismo patrón en casi todos los temas:
   - comprobar en GitHub, en *Settings → Pages*, que está marcado *Enforce HTTPS*, porque Bing ve la portada con `http`.
 - **Próxima revisión:** cuando las páginas lleven 4 semanas publicadas con los títulos nuevos. Hay que comparar el CTR y la posición de las dos guías en inglés y repetir el ajuste con «regla de los 6» si sigue en la posición 8 sin clics.
 
+### 2.0 bis. Segunda lectura (datos del 10 de noviembre de 2026)
+
+Datos de Google desde el 12 de octubre: 8 clics y 897 impresiones. El móvil se queda con 525 impresiones y la posición 10. Por países, EE. UU. suma 360 impresiones, España 97 y México 47. **Ninguno de los cambios de este estudio estaba publicado**: los datos miden el sitio original.
+
+| Página | Impresiones | Posición | Tendencia (12–26/10 frente a 27/10–09/11) |
+|---|---|---|---|
+| Agujas (EN) | 374 | 9,7 | Sube: es la página fuerte. Nuevas consultas sobre el bisel |
+| Infiltración (EN) | 172 | 9,7 | Baja fuerte: de 151 a 21 impresiones y de la posición 8,9 a la 14,9 |
+| Regla de los 6 (ES) | 97 | 6,3 | Gana posición (de 7,8 a 3,7) y pierde volumen |
+| Doppler (EN) | 94 | 31 | Sube de posición (de 38,8 a 15,8). Recibe consultas de mapeo, como «avf mapping ultrasound» en la posición 71 |
+| Punción ecoguiada (ES) | 54 | 56 | «Punción ecoguiada»: 42 impresiones en la posición 69, la mayor brecha |
+| Aneurisma (EN) | 22 | 17,8 | Sube mucho (de la posición 38 a la 8,3). En Bing es su mejor página |
+
+**Indexación:**
+- **Indexadas:** `/guias/`, `/guias/puncion-ecoguiada-fav/` y, en inglés, agujas, infiltración y aneurisma.
+- **«Rastreada: actualmente sin indexar»:** `/guias/tecnica-puncion-fav/`.
+- **«Descubierta: actualmente sin indexar»:** `/guias/aneurisma-fav/` y `/guias/puncion-escalera-area-ojal/`.
+- **Desconocidas para Google:** `/guias/infiltracion-fav/` (su URL correcta) y `/en/`, que en Bing sí tiene 60 impresiones.
+
+**Bing** (16/10–06/11): 5 clics y 246 impresiones. Destacan el aneurisma (EN), `/en/`, la técnica (EN) y la escalera y el ojal, entre las posiciones 3 y 6. Sigue viendo `http://fistulab.com/`.
+
+**Decisiones tomadas:**
+1. **Siguiente artículo: mapeo vascular prequirúrgico** (ES/EN). Lo justifican tres cosas: el grupo de ecografía en inglés es el que más sube, la consulta «avf mapping ultrasound» ya llega a la guía equivocada (Doppler, posición 71), y estaba en el plan con el número 8.
+2. **Preguntas sobre el bisel** en la guía de agujas («¿bisel hacia arriba o hacia abajo?», «¿qué es el ojo posterior?»), por las consultas nuevas sobre el bisel.
+3. **Enlaces directos desde la portada** (ES/EN) a las guías sin indexar (técnica, infiltración, aneurisma, escalera y ojal) y al mapeo, para que Google las rastree antes.
+4. **Enlace del Doppler al mapeo**, en los dos idiomas, para que cada consulta llegue a su página.
+
+**Pendiente (Alberto):**
+- **Publicar:** subir la rama y fusionarla en `main`. Los títulos y las guías nuevas no cuentan hasta entonces.
+- **Pedir la indexación, URL a URL, de:**
+  - `https://fistulab.com/en/`
+  - `https://fistulab.com/guias/tecnica-puncion-fav/`
+  - `https://fistulab.com/guias/aneurisma-fav/`
+  - `https://fistulab.com/guias/puncion-escalera-area-ojal/`
+  - `https://fistulab.com/guias/infiltracion-fav/`
+  - las 12 URL nuevas de las guías, en cuanto estén publicadas.
+- **Comprobar *Enforce HTTPS* en GitHub Pages,** porque Bing sigue viendo `http`.
+
 ### 2.1 Esta semana
 
 1. **Propiedad de dominio.** Da de alta `fistulab.com` como propiedad de dominio en Search Console. Se verifica con un registro TXT en DonDominio, y así cubre `www`, `http` y todas las rutas.

@@ -17,6 +17,7 @@ export const GUIDE_INDEX: PagePair = { es: 'guias/', en: 'en/guides/' };
 /** Guías de punción y ecografía de la FAV (en el orden en que aparecen en el índice). */
 export const GUIDES: PagePair[] = [
   { es: 'guias/tipos-fistula-arteriovenosa/', en: 'en/guides/types-of-av-fistula/' },
+  { es: 'guias/mapeo-vascular-ecografia/', en: 'en/guides/vein-mapping-ultrasound/' },
   { es: 'guias/tecnica-puncion-fav/', en: 'en/guides/avf-cannulation-technique/' },
   { es: 'guias/puncion-ecoguiada-fav/', en: 'en/guides/ultrasound-guided-fistula-cannulation/' },
   { es: 'guias/puncion-dificil-fav/', en: 'en/guides/difficult-fistula-cannulation/' },
