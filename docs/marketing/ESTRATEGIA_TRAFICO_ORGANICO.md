@@ -269,14 +269,14 @@ Las rutas siguen el patrón actual.
 |---|---|---|---|---|---|
 | A1 | P1 | Exploración física de la FAV: frémito, soplo, elevación del brazo y aumento del pulso | `guias/exploracion-fisica-fav/` · `en/guides/av-fistula-physical-exam/` | Informativa (enfermería, técnicos, exámenes) | `?caso=rc_estenosis`, `?caso=rc_madura` |
 | A2 | P1 · **publicada** | Tipos de fístula arteriovenosa: radiocefálica, braquiocefálica, braquiobasílica y prótesis (con 3D) | `guias/tipos-fistula-arteriovenosa/` · `en/guides/types-of-av-fistula/` | Informativa amplia (estudiantes, pacientes, enfermería) | `rc_madura`, `bc_obeso`, `bb_transpuesta`, `ptfe_asa` |
-| A3 | P2 | Mapeo vascular con ecografía antes de la FAV | `guias/mapeo-vascular-ecografia/` · `en/guides/vein-mapping-ultrasound/` | Profesional (nefrología, cirugía, enfermería de ERCA) | `?caso=normal&modo=explore` |
+| A3 | P2 · **publicada** | Mapeo vascular con ecografía antes de la FAV | `guias/mapeo-vascular-ecografia/` · `en/guides/vein-mapping-ultrasound/` | Profesional (nefrología, cirugía, enfermería de ERCA) | `?caso=normal&modo=explore` |
 | A4 | P3 | FAV, prótesis o catéter: cómo se elige el acceso vascular | `guias/fav-protesis-o-cateter/` · `en/guides/fistula-vs-graft-vs-catheter/` | Informativa (estudiantes, pacientes) | — |
 
 #### B. Complicaciones
 
 | # | P | Título de trabajo | Ruta ES · EN | Intención | Practicar |
 |---|---|---|---|---|---|
-| B1 | P1 | Estenosis de la FAV: signos, Doppler y cuándo avisar | `guias/estenosis-fav/` · `en/guides/av-fistula-stenosis/` | Profesional | `?caso=rc_estenosis`, `?leccion=doppler-fav` |
+| B1 | P1 · **publicada** | Estenosis de la FAV: signos, Doppler y cuándo avisar | `guias/estenosis-fav/` · `en/guides/av-fistula-stenosis/` | Profesional | `?caso=rc_estenosis`, `?leccion=doppler-fav` |
 | B2 | P1 | FAV trombosada: fístula sin frémito, qué hacer y en cuánto tiempo | `guias/trombosis-fav/` · `en/guides/clotted-av-fistula/` | Urgente (enfermería y pacientes) | `?caso=rc_aneurisma` (trombo mural) |
 | B3 | P2 | Salida accidental de la aguja venosa: prevención, fijación y actuación | `guias/salida-aguja-venosa/` · `en/guides/venous-needle-dislodgement/` | Seguridad del paciente | — |
 | B4 | P2 | Síndrome de robo: isquemia de la mano en la FAV | `guias/sindrome-robo-fav/` · `en/guides/dialysis-access-steal-syndrome/` | Profesional | — |

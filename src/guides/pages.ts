@@ -26,6 +26,7 @@ export const GUIDES: PagePair[] = [
   { es: 'guias/regla-de-los-6-maduracion-fav/', en: 'en/guides/rule-of-6s-fistula-maturation/' },
   { es: 'guias/ecografia-doppler-fav/', en: 'en/guides/av-fistula-doppler-ultrasound/' },
   { es: 'guias/puncion-escalera-area-ojal/', en: 'en/guides/rope-ladder-buttonhole-cannulation/' },
+  { es: 'guias/estenosis-fav/', en: 'en/guides/av-fistula-stenosis/' },
   { es: 'guias/infiltracion-fav/', en: 'en/guides/fistula-infiltration/' },
   { es: 'guias/aneurisma-fav/', en: 'en/guides/av-fistula-aneurysm/' },
   { es: 'guias/via-periferica-ecoguiada/', en: 'en/guides/ultrasound-guided-peripheral-iv/' },
