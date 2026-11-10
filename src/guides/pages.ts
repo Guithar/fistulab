@@ -23,6 +23,7 @@ export const GUIDES: PagePair[] = [
   { es: 'guias/puncion-dificil-fav/', en: 'en/guides/difficult-fistula-cannulation/' },
   { es: 'guias/primera-puncion-fav/', en: 'en/guides/first-cannulation-new-fistula/' },
   { es: 'guias/angulo-agujas-puncion-fav/', en: 'en/guides/avf-needle-angle-and-gauge/' },
+  { es: 'guias/exploracion-fisica-fav/', en: 'en/guides/av-fistula-physical-exam/' },
   { es: 'guias/regla-de-los-6-maduracion-fav/', en: 'en/guides/rule-of-6s-fistula-maturation/' },
   { es: 'guias/ecografia-doppler-fav/', en: 'en/guides/av-fistula-doppler-ultrasound/' },
   { es: 'guias/puncion-escalera-area-ojal/', en: 'en/guides/rope-ladder-buttonhole-cannulation/' },
