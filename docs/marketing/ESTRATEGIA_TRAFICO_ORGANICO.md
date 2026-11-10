@@ -277,7 +277,7 @@ Las rutas siguen el patrón actual.
 | # | P | Título de trabajo | Ruta ES · EN | Intención | Practicar |
 |---|---|---|---|---|---|
 | B1 | P1 · **publicada** | Estenosis de la FAV: signos, Doppler y cuándo avisar | `guias/estenosis-fav/` · `en/guides/av-fistula-stenosis/` | Profesional | `?caso=rc_estenosis`, `?leccion=doppler-fav` |
-| B2 | P1 | FAV trombosada: fístula sin frémito, qué hacer y en cuánto tiempo | `guias/trombosis-fav/` · `en/guides/clotted-av-fistula/` | Urgente (enfermería y pacientes) | `?caso=rc_aneurisma` (trombo mural) |
+| B2 | P1 · **publicada** | FAV trombosada: fístula sin frémito, qué hacer y en cuánto tiempo | `guias/trombosis-fav/` · `en/guides/clotted-av-fistula/` | Urgente (enfermería y pacientes) | `?caso=rc_aneurisma` (trombo mural) |
 | B3 | P2 | Salida accidental de la aguja venosa: prevención, fijación y actuación | `guias/salida-aguja-venosa/` · `en/guides/venous-needle-dislodgement/` | Seguridad del paciente | — |
 | B4 | P2 | Síndrome de robo: isquemia de la mano en la FAV | `guias/sindrome-robo-fav/` · `en/guides/dialysis-access-steal-syndrome/` | Profesional | — |
 | B5 | P2 | Recirculación del acceso: causas y cómo medirla | `guias/recirculacion-acceso-vascular/` · `en/guides/access-recirculation/` | Profesional | `rc_estenosis` |

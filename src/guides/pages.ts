@@ -28,6 +28,7 @@ export const GUIDES: PagePair[] = [
   { es: 'guias/ecografia-doppler-fav/', en: 'en/guides/av-fistula-doppler-ultrasound/' },
   { es: 'guias/puncion-escalera-area-ojal/', en: 'en/guides/rope-ladder-buttonhole-cannulation/' },
   { es: 'guias/estenosis-fav/', en: 'en/guides/av-fistula-stenosis/' },
+  { es: 'guias/trombosis-fav/', en: 'en/guides/clotted-av-fistula/' },
   { es: 'guias/infiltracion-fav/', en: 'en/guides/fistula-infiltration/' },
   { es: 'guias/aneurisma-fav/', en: 'en/guides/av-fistula-aneurysm/' },
   { es: 'guias/via-periferica-ecoguiada/', en: 'en/guides/ultrasound-guided-peripheral-iv/' },
