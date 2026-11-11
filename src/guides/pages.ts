@@ -20,6 +20,7 @@ export const GUIDES: PagePair[] = [
   { es: 'guias/mapeo-vascular-ecografia/', en: 'en/guides/vein-mapping-ultrasound/' },
   { es: 'guias/tecnica-puncion-fav/', en: 'en/guides/avf-cannulation-technique/' },
   { es: 'guias/puncion-ecoguiada-fav/', en: 'en/guides/ultrasound-guided-fistula-cannulation/' },
+  { es: 'guias/arteria-o-vena-ecografia/', en: 'en/guides/artery-vs-vein-ultrasound/' },
   { es: 'guias/puncion-dificil-fav/', en: 'en/guides/difficult-fistula-cannulation/' },
   { es: 'guias/primera-puncion-fav/', en: 'en/guides/first-cannulation-new-fistula/' },
   { es: 'guias/angulo-agujas-puncion-fav/', en: 'en/guides/avf-needle-angle-and-gauge/' },

@@ -300,7 +300,7 @@ En lugar de crear una página nueva sobre las primeras punciones de una FAV nuev
 
 | # | P | Título de trabajo | Ruta ES · EN | Intención | Practicar |
 |---|---|---|---|---|---|
-| D1 | P1 | ¿Arteria o vena? Cuatro formas de distinguirlas en ecografía | `guias/arteria-o-vena-ecografia/` · `en/guides/artery-vs-vein-ultrasound/` | POCUS amplia (urgencias, UCI, vías periféricas) | `?leccion=arteria-vena` |
+| D1 | P1 · **publicada** | ¿Arteria o vena? Cómo distinguirlas en ecografía (seis signos y trampas) | `guias/arteria-o-vena-ecografia/` · `en/guides/artery-vs-vein-ultrasound/` | POCUS amplia (urgencias, UCI, vías periféricas) | `?leccion=arteria-vena` |
 | D2 | P1 | Ecografía básica para enfermería: profundidad, ganancia, foco y TGC | `guias/ecografia-basica-enfermeria/` · `en/guides/ultrasound-knobology/` | POCUS amplia | `?leccion=knobologia` |
 | D3 | P2 | En plano o fuera de plano: qué abordaje elegir en cualquier acceso vascular | `guias/en-plano-fuera-de-plano/` · `en/guides/in-plane-vs-out-of-plane/` | POCUS amplia. Debe ser genérica para no competir con *Punción ecoguiada de la FAV* | `?leccion=eje-largo`, `?leccion=eje-corto` |
 | D4 | P2 | Artefactos ecográficos en el acceso vascular: sombra, refuerzo, reverberación y anisotropía | `guias/artefactos-ecografia-acceso-vascular/` · `en/guides/ultrasound-artifacts-vascular-access/` | Muy visual: búsqueda de imágenes | `?leccion=artefactos`, `rc_calcificada` |
