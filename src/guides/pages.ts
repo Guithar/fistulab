@@ -32,6 +32,7 @@ export const GUIDES: PagePair[] = [
   { es: 'guias/trombosis-fav/', en: 'en/guides/clotted-av-fistula/' },
   { es: 'guias/infiltracion-fav/', en: 'en/guides/fistula-infiltration/' },
   { es: 'guias/aneurisma-fav/', en: 'en/guides/av-fistula-aneurysm/' },
+  { es: 'guias/formacion-puncion-ecoguiada/', en: 'en/guides/ultrasound-cannulation-training-program/' },
   { es: 'guias/via-periferica-ecoguiada/', en: 'en/guides/ultrasound-guided-peripheral-iv/' },
 ];
 

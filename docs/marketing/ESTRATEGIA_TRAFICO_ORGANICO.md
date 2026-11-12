@@ -312,7 +312,7 @@ En lugar de crear una página nueva sobre las primeras punciones de una FAV nuev
 | # | P | Título de trabajo | Ruta ES · EN | Intención | Practicar |
 |---|---|---|---|---|---|
 | E1 | P1 | Simuladores de punción de la FAV: virtual, *phantom* casero y comerciales | `guias/simuladores-puncion-fav/` · `en/guides/fistula-cannulation-simulators/` | Docentes y quienes buscan «simulador». **Atrae enlaces** | Portada |
-| E2 | P1 | Cómo implantar la punción ecoguiada en una unidad: plan de formación y rúbrica | `guias/formacion-puncion-ecoguiada/` · `en/guides/ultrasound-cannulation-training-program/` | Supervisión y docencia | `?vista=enfoque` (proyectar) |
+| E2 | P1 · **publicada** | Cómo implantar la punción ecoguiada en una unidad: plan de formación y rúbrica | `guias/formacion-puncion-ecoguiada/` · `en/guides/ultrasound-cannulation-training-program/` | Supervisión y docencia | `?vista=enfoque` (proyectar) |
 | E3 | P1 en EN, P2 en ES | Preguntas de examen sobre acceso vascular con explicación: CCHT, CHT y CNN en inglés; EIR en español | `guias/preguntas-acceso-vascular/` · `en/guides/dialysis-vascular-access-practice-questions/` | Estudiantes y técnicos (gran volumen en EE. UU.) | Un caso por pregunta |
 | E4 | P3 | Glosario del acceso vascular español-inglés | `guias/glosario-acceso-vascular/` · `en/guides/vascular-access-glossary/` | Cola larga | — |
 
