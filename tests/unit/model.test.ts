@@ -7,9 +7,10 @@ import { AnatomyModel } from '../../src/anatomy/model';
 import { Needle } from '../../src/interaction/needle';
 import { computePose, defaultProbeState, skinParamAbove } from '../../src/interaction/probePose';
 import type { ProbePose } from '../../src/sim/UltrasoundSim';
-import { Metrics } from '../../src/training/metrics';
+import { catheterPct, Metrics, pivChecks, PivOutcome } from '../../src/training/metrics';
 import { FLUSH_INJECT_S, flushParams, innerDiameter, jetVelocity } from '../../src/sim/flush';
 import { armPositionOk, ChecklistState, procedureChecklist, zoneOk } from '../../src/training/checklist';
+import { LESSONS } from '../../src/training/lessons';
 
 function build(id: string) {
   const cd = caseById(id);
@@ -310,6 +311,342 @@ describe('lista de pasos de la punción', () => {
     const graft = procedureChecklist({ ...full, access: { ...base.access!, graft: true } });
     expect(graft[3].label).toContain('Sin compresor');
     expect(graft[3].done).toBe(false);
+  });
+});
+
+describe('vía periférica: caso piv_dificil', () => {
+  const ZONE = [300, 320, 340, 360];
+
+  it('se añade al final sin tocar los doce casos de fístula', () => {
+    expect(CASES.map((c) => c.id)).toEqual([
+      'normal',
+      'rc_madura',
+      'bc_obeso',
+      'rc_tortuosa',
+      'rc_estenosis',
+      'rc_aneurisma',
+      'rc_inmadura',
+      'rc_colaterales',
+      'bb_transpuesta',
+      'ptfe_asa',
+      'rc_hematoma',
+      'rc_calcificada',
+      'piv_dificil',
+    ]);
+    expect(CASES.filter((c) => c.procedure === 'piv').map((c) => c.id)).toEqual(['piv_dificil']);
+  });
+
+  it('la vena diana está en el límite de la regla 3:1:3: ≈ 3 mm con compresor y a 1–1,5 cm', () => {
+    const { cd, arm, model } = build('piv_dificil');
+    const zone = cd.access!.zone;
+    const v = model.byId(cd.access!.veinId)!;
+    expect(v.def.kind).toBe('vein');
+    const inZone = v.samples.filter((s) => s.p.x >= zone[0] && s.p.x <= zone[1]);
+    expect(inZone.length).toBeGreaterThan(20);
+    for (const s of inZone) {
+      // sin compresor no llega a los 3 mm
+      const d0 = 2 * s.r * v.dyn.radiusScale;
+      expect(d0).toBeGreaterThan(2.4);
+      expect(d0).toBeLessThan(3);
+      // pared anterior a ≈ 1 cm y pared posterior a menos de 1,5 cm; por encima de la fascia
+      const depth = arm.skinDepth(s.p);
+      expect(depth - s.r).toBeGreaterThan(9.5);
+      expect(depth + s.r).toBeLessThan(15);
+      expect(arm.fasciaDepth(s.p)).toBeLessThan(-s.r);
+      expect(model.query(s.p).inLumen).toBe(true);
+    }
+    model.tourniquet = true;
+    model.updateDynamics(0.3);
+    for (const s of inZone) {
+      const d1 = 2 * s.r * v.dyn.radiusScale;
+      expect(d1).toBeGreaterThanOrEqual(3);
+      expect(d1).toBeLessThan(3.4);
+    }
+  });
+
+  it('las venas superficiales son finas y la arteria humeral y el nervio mediano quedan más profundos, a poca distancia', () => {
+    const { arm, model } = build('piv_dificil');
+    for (const id of ['v_cefalica', 'v_mediana_ab', 'v_mediana_cubital']) for (const s of model.byId(id)!.samples) expect(2 * s.r).toBeLessThan(2);
+    const v = model.byId('v_basilica')!;
+    for (const x of ZONE) {
+      const at = (id: string) => {
+        const st = model.byId(id)!;
+        return st.samples.reduce((a, b) => (Math.abs(b.p.x - x) < Math.abs(a.p.x - x) ? b : a));
+      };
+      const vein = v.samples.reduce((a, b) => (Math.abs(b.p.x - x) < Math.abs(a.p.x - x) ? b : a));
+      for (const id of ['a_humeral', 'n_mediano']) {
+        const o = at(id);
+        expect(arm.skinDepth(o.p)).toBeGreaterThan(arm.skinDepth(vein.p) + 4);
+        const d = o.p.distanceTo(vein.p);
+        expect(d).toBeGreaterThan(5);
+        expect(d).toBeLessThan(30);
+      }
+    }
+  });
+});
+
+/** Coloca el catéter sobre aguja apuntando a la vena diana (en plano, hacia proximal) y avanza hasta el reflujo. */
+function pivToFlash(angle = 45, length = 48) {
+  const { cd, arm, model } = build('piv_dificil');
+  model.tourniquet = true;
+  model.updateDynamics(0.3);
+  const v = model.byId(cd.access!.veinId)!;
+  const target = v.samples.find((s) => s.p.x >= 330)!;
+  const par = skinParamAbove(arm, target.p);
+  const depth = arm.skinDepth(target.p);
+  const n = new Needle('venosa');
+  n.setCatheter(20, length);
+  const events: string[] = [];
+  n.onEvent = (e) => events.push(e.type);
+  const ids = new Set([v.def.id]);
+  let t = 0;
+  n.place(arm, par.x - depth / Math.tan((angle * Math.PI) / 180), par.theta, 0, angle);
+  const advance = (mm: number) => {
+    for (let k = 0; k < Math.round(mm / 0.1); k++) {
+      n.depth += 0.1;
+      n.update(model, (t += 0.02), ids);
+    }
+  };
+  for (let i = 0; i < 400 && n.state !== 'luz'; i++) advance(0.1);
+  const slide = (mm: number) => n.slideCatheter(model, mm, (t += 0.02));
+  const withdraw = () => {
+    n.depth = -3;
+    n.update(model, (t += 0.02), ids);
+  };
+  return { n, c: n.cath!, model, v, events, ids, advance, slide, withdraw };
+}
+
+describe('catéter sobre aguja: máquina de estados', () => {
+  it('con el reflujo la punta del catéter aún no está en la vena y no progresa', () => {
+    const { n, c, model, events, slide } = pivToFlash();
+    expect(n.state).toBe('luz');
+    expect(n.inVessel?.def.id).toBe('v_basilica');
+    expect(events).toContain('flash');
+    expect(n.catheterTipInLumen(model)).toBe(false);
+    expect(slide(1)).toBe(false);
+    expect(c.stage).toBe('montado');
+    expect(c.slid).toBe(0);
+    expect(events).toContain('cath-stuck');
+  });
+
+  it('avanzando 1–2 mm más entra la punta del catéter; se desliza por la luz y la aguja queda fija', () => {
+    const { n, c, model, v, events, advance, slide, ids } = pivToFlash();
+    advance(1.8);
+    expect(n.state).toBe('luz');
+    expect(n.catheterTipInLumen(model)).toBe(true);
+    expect(slide(1)).toBe(true);
+    expect(c.stage).toBe('avanzado');
+    expect(c.vessel).toBe(v);
+    expect(events).toContain('cath-advance');
+    // la aguja ya no avanza ni cambia de ángulo: sólo puede retirarse
+    const d = n.depth;
+    n.depth += 3;
+    n.angle -= 10;
+    n.update(model, 99, ids);
+    expect(n.depth).toBe(d);
+    expect(n.angle).toBe(45);
+    // hasta el cono: todo el tramo libre sigue dentro de la luz
+    for (let i = 0; i < 200 && !c.full; i++) slide(0.5);
+    expect(c.full).toBe(true);
+    expect(n.catheterInserted()).toBeCloseTo(c.length, 3);
+    for (const p of [...c.free, c.tip]) {
+      const q = model.query(p);
+      expect(q.struct).toBe(v);
+      expect(q.inLumen).toBe(true);
+    }
+    // el catéter, flexible, acaba alineado con la vena
+    const smp = v.samples[model.nearestSample(v, c.tip).idx];
+    expect(Math.abs(smp.t.dot(c.tipDir))).toBeGreaterThan(0.98);
+    expect(slide(1)).toBe(false);
+  });
+
+  it('retirar la aguja deja el catéter en la vena; la longitud dentro no cambia al soltar el compresor', () => {
+    const { n, c, model, v, events, advance, slide, withdraw } = pivToFlash();
+    advance(1.8);
+    for (let i = 0; i < 200 && !c.full; i++) slide(0.5);
+    const mm = n.catheterInVein(model);
+    expect(mm).toBeGreaterThan(0.65 * c.length);
+    expect(mm).toBeLessThan(c.length - 12);
+    withdraw();
+    expect(c.stage).toBe('aguja-retirada');
+    expect(n.needleOut).toBe(true);
+    expect(n.inserted).toBe(true);
+    expect(n.state).toBe('luz');
+    expect(n.inVessel).toBe(v);
+    expect(events).toContain('needle-out');
+    expect(n.deviceTip().distanceTo(c.tip)).toBe(0);
+    expect(n.catheterEcho().length).toBeGreaterThanOrEqual(2);
+    model.tourniquet = false;
+    model.updateDynamics(0.4);
+    expect(n.catheterInVein(model)).toBeCloseTo(mm, 6);
+    n.removeCatheter(100);
+    expect(c.stage).toBe('montado');
+    expect(n.state).toBe('fuera');
+    expect(n.inserted).toBe(false);
+  });
+
+  it('con poco ángulo el trayecto hasta la vena se come el catéter: el de 48 mm no llega al 65 % y el de 64 mm sí', () => {
+    const run = (angle: number, length: number) => {
+      const { n, c, model, advance, slide } = pivToFlash(angle, length);
+      advance(2);
+      expect(n.state).toBe('luz');
+      for (let i = 0; i < 300 && !c.full; i++) slide(0.5);
+      return (100 * n.catheterInVein(model)) / c.length;
+    };
+    expect(run(45, 48)).toBeGreaterThanOrEqual(65);
+    expect(run(30, 48)).toBeLessThan(65);
+    expect(run(30, 64)).toBeGreaterThanOrEqual(65);
+  });
+
+  it('deslizar el catéter con la aguja en el tejido lo deja fuera de la vena', () => {
+    const { cd, arm, model } = build('piv_dificil');
+    const v = model.byId(cd.access!.veinId)!;
+    const target = v.samples.find((s) => s.p.x >= 330)!;
+    const par = skinParamAbove(arm, target.p);
+    const n = new Needle('venosa');
+    n.setCatheter();
+    const events: string[] = [];
+    n.onEvent = (e) => events.push(e.type);
+    n.place(arm, par.x - 12, par.theta, 0, 45);
+    n.depth = 6;
+    n.update(model, 0, new Set());
+    expect(n.state).toBe('tejido');
+    expect(n.slideCatheter(model, 5, 1)).toBe(true);
+    expect(events).toContain('cath-out');
+    expect(n.cath!.outside).toBe(true);
+    n.depth = -3;
+    n.update(model, 2, new Set());
+    expect(n.needleOut).toBe(true);
+    expect(n.state).toBe('tejido');
+    expect(n.inVessel).toBeNull();
+    expect(n.catheterInVein(model)).toBe(0);
+  });
+
+  it('retirar la aguja sin haber deslizado el catéter lo saca todo', () => {
+    const { n, c, events, withdraw } = pivToFlash();
+    withdraw();
+    expect(c.stage).toBe('montado');
+    expect(n.needleOut).toBe(false);
+    expect(n.state).toBe('fuera');
+    expect(events).toContain('withdraw');
+  });
+
+  it('una aguja de fístula no tiene catéter', () => {
+    const n = new Needle('arterial');
+    expect(n.cath).toBeNull();
+    expect(n.device).toBe('fistula');
+    expect(n.maxDepth).toBe(23);
+    expect(n.catheterPath()).toEqual([]);
+    expect(n.catheterEcho()).toEqual([]);
+    expect(n.deviceTip().equals(n.tip)).toBe(true);
+  });
+});
+
+describe('vía periférica: métrica, evaluación y lista de pasos', () => {
+  const good: PivOutcome = {
+    needleOut: true,
+    vessel: { name: 'Vena basílica', kind: 'vein' },
+    inVeinMm: 32.6,
+    lengthMm: 48,
+    transfixed: false,
+    arteryHit: false,
+    nerveHit: false,
+    asepsis: true,
+    tourniquet: false,
+    flushed: true,
+    infiltrations: 0,
+  };
+
+  it('porcentaje de catéter dentro de la vena', () => {
+    expect(catheterPct(32.6, 48)).toBe(68);
+    expect(catheterPct(31.2, 48)).toBe(65);
+    expect(catheterPct(60, 48)).toBe(100);
+    expect(catheterPct(0, 48)).toBe(0);
+    expect(catheterPct(10, 0)).toBeNull();
+    const m = new Metrics();
+    expect(m.snapshot().catheterPct).toBeNull();
+    m.catheterInVein = 24;
+    m.catheterLength = 48;
+    expect(m.snapshot().catheterPct).toBe(50);
+    expect(m.snapshot().catheterInVein).toBe(24);
+  });
+
+  it('una vía correcta cumple todos los criterios y no incluye los de la fístula', () => {
+    const checks = pivChecks(good);
+    expect(checks.every((c) => c.ok === true)).toBe(true);
+    expect(checks.map((c) => c.label).join(' ')).not.toMatch(/anastomosis|arterial \(|venosa|Separación/i);
+    expect(checks[1].detail).toContain('68 %');
+  });
+
+  it('criterio de longitud: ≥ 65 % del catéter dentro de la vena', () => {
+    expect(pivChecks({ ...good, inVeinMm: 31.2 })[1].ok).toBe(true); // 65 %
+    expect(pivChecks({ ...good, inVeinMm: 30.6 })[1].ok).toBe(false); // 64 %
+    expect(pivChecks({ ...good, vessel: null })[1].ok).toBeNull();
+  });
+
+  it('no es válida con la aguja dentro, fuera de la vena o en una arteria', () => {
+    expect(pivChecks({ ...good, needleOut: false })[0].ok).toBe(false);
+    expect(pivChecks({ ...good, vessel: null })[0].ok).toBe(false);
+    const art = pivChecks({ ...good, vessel: { name: 'Arteria humeral', kind: 'artery' }, arteryHit: true });
+    expect(art[0].ok).toBe(false);
+    expect(art[2].ok).toBe(false);
+    expect(pivChecks({ ...good, nerveHit: true })[2].ok).toBe(false);
+    expect(pivChecks({ ...good, transfixed: true })[3].ok).toBe(false);
+    expect(pivChecks({ ...good, asepsis: false })[4].ok).toBe(false);
+    expect(pivChecks({ ...good, tourniquet: true })[5].ok).toBe(false);
+    expect(pivChecks({ ...good, flushed: false })[6].ok).toBe(false);
+    expect(pivChecks({ ...good, flushed: false, infiltrations: 1 })[6].detail).toContain('Extravasación');
+  });
+
+  it('la extravasación del lavado penaliza la puntuación', () => {
+    const m = new Metrics();
+    m.onEvent({ t: 1, type: 'infiltration', msg: '', severity: 'error' });
+    m.checks = pivChecks({ ...good, vessel: null, flushed: false, infiltrations: 1 });
+    expect(m.score()).toBe(100 - 12 - 35 - 5);
+  });
+
+  it('lista de pasos propia: once pasos que se marcan con el estado', () => {
+    const base: ChecklistState = {
+      armAngle: 58,
+      armPitch: 17,
+      measures: 0,
+      probeX: 335,
+      access: { zone: [295, 375] },
+      otherTipX: null,
+      tourniquet: false,
+      asepsis: false,
+      placed: false,
+      flashed: false,
+      inLumen: false,
+      angleToVessel: null,
+      flushes: 0,
+      confirmed: false,
+      piv: { tourniquetAtPuncture: false, catheterTipInVein: false, inVeinPct: null, threaded: false, needleOut: false, flushed: false },
+    };
+    const items = procedureChecklist(base);
+    expect(items.length).toBe(11);
+    expect(items.filter((i) => i.done).length).toBe(1); // el brazo
+    expect(items.map((i) => i.label).join(' ')).not.toMatch(/anastomosis|FAV|prótesis/i);
+    // con el compresor aún puesto el último paso clínico no se marca
+    const placed = { ...base, measures: 2, tourniquet: true, asepsis: true, placed: true, flashed: true, inLumen: true };
+    const mid = procedureChecklist({ ...placed, piv: { tourniquetAtPuncture: true, catheterTipInVein: true, inVeinPct: 67, threaded: true, needleOut: true, flushed: false } });
+    expect(mid.filter((i) => i.done).length).toBe(9);
+    const short = procedureChecklist({ ...placed, piv: { tourniquetAtPuncture: true, catheterTipInVein: true, inVeinPct: 50, threaded: true, needleOut: true, flushed: false } });
+    expect(short[7].done).toBe(false);
+    const full = procedureChecklist({ ...placed, tourniquet: false, confirmed: true, piv: { tourniquetAtPuncture: true, catheterTipInVein: true, inVeinPct: 67, threaded: true, needleOut: true, flushed: true } });
+    expect(full.every((i) => i.done)).toBe(true);
+  });
+});
+
+describe('lecciones', () => {
+  it('cada lección tiene un caso que existe y la de la vía periférica usa el caso nuevo', () => {
+    for (const l of LESSONS) expect(CASES.some((c) => c.id === l.caseId)).toBe(true);
+    expect(new Set(LESSONS.map((l) => l.id)).size).toBe(LESSONS.length);
+    const piv = LESSONS.find((l) => l.id === 'via-periferica')!;
+    expect(piv.caseId).toBe('piv_dificil');
+    expect(piv.mode).toBe('cannulate');
+    // como en las demás, casi todos los pasos se comprueban solos
+    expect(piv.steps.every((s) => !!s.check)).toBe(true);
   });
 });
 
