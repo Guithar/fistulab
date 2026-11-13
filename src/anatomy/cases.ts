@@ -1529,13 +1529,13 @@ export const CASES: CaseDef[] = [
       'Difficult venous access: no visible or palpable veins, and landmark-based attempts have already failed. This is the situation in which the Society of Hospital Medicine (2019) recommends real-time ultrasound guidance.',
     ),
     description: tr(
-      'Paciente con obesidad y sin fístula que necesita una vía periférica. Las venas superficiales del antebrazo son finas (< 2 mm). La mejor diana es la vena basílica por encima del codo, en el límite de lo puncionable según la regla «3:1:3» de WikEM (al menos 3 mm de diámetro y a 1 cm de profundidad, 1,5 cm como máximo): mide 2,6 mm, llega a unos 3 mm con el compresor y su pared anterior está a 1 cm de la piel. Más profundos discurren la arteria humeral, con sus dos venas, y el nervio mediano. Se canaliza con un catéter sobre aguja: tras el reflujo se avanza 1–2 mm más, se desliza el catéter con la aguja quieta y se retira la aguja (Manual MSD).',
-      'Patient with obesity and no fistula who needs a peripheral IV. The superficial forearm veins are thin (< 2 mm). The best target is the basilic vein above the elbow, at the limit of what can be cannulated under the WikEM “3:1:3” rule (at least 3 mm in diameter and 1 cm deep, 1.5 cm at most): it measures 2.6 mm, reaches about 3 mm with a tourniquet, and its anterior wall lies 1 cm below the skin. Deeper down run the brachial artery, with its two veins, and the median nerve. It is cannulated with an over-the-needle catheter: after flashback you advance 1–2 mm further, slide the catheter while holding the needle still, and remove the needle (MSD Manual).',
+      'Paciente con obesidad, sin enfermedad renal ni fístula, que necesita una vía periférica. Las venas superficiales del antebrazo son finas (< 2 mm). La mejor diana es la vena basílica por encima del codo, en el límite de lo puncionable según la regla «3:1:3» de WikEM (al menos 3 mm de diámetro y a 1 cm de profundidad, 1,5 cm como máximo): mide 2,6 mm, llega a unos 3 mm con el compresor y su pared anterior está a 1 cm de la piel. Más profundos discurren la arteria humeral, con sus dos venas, y el nervio mediano. Se canaliza con un catéter sobre aguja: tras el reflujo se avanza 1–2 mm más, se desliza el catéter con la aguja quieta y se retira la aguja (Manual MSD).',
+      'Patient with obesity, with no kidney disease and no fistula, who needs a peripheral IV. The superficial forearm veins are thin (< 2 mm). The best target is the basilic vein above the elbow, at the limit of what can be cannulated under the WikEM “3:1:3” rule (at least 3 mm in diameter and 1 cm deep, 1.5 cm at most): it measures 2.6 mm, reaches about 3 mm with a tourniquet, and its anterior wall lies 1 cm below the skin. Deeper down run the brachial artery, with its two veins, and the median nerve. It is cannulated with an over-the-needle catheter: after flashback you advance 1–2 mm further, slide the catheter while holding the needle still, and remove the needle (MSD Manual).',
     ),
     objectives: [
       tr(
-        'Distinguir la vena de la arteria humeral: la vena se colapsa al presionar con la sonda y la arteria no (Manual MSD).',
-        'Tell the vein from the brachial artery: the vein collapses under probe pressure and the artery does not (MSD Manual).',
+        'Distinguir la vena de la arteria humeral: la vena se comprime con la sonda con más facilidad que la arteria (Manual MSD).',
+        'Tell the vein from the brachial artery: the vein is compressed by the probe more easily than the artery (MSD Manual).',
       ),
       tr(
         'Medir el diámetro y la profundidad de la vena con el compresor puesto y valorar si cumple la regla «3:1:3».',
@@ -1565,6 +1565,10 @@ export const CASES: CaseDef[] = [
       ),
     ],
     tips: [
+      tr(
+        'Este paciente no tiene enfermedad renal. En la enfermedad renal crónica avanzada, las venas del antebrazo y del brazo se preservan para una futura fístula y la vía va en el dorso de la mano (GEMAV); el brazo de una fístula no se usa para vías.',
+        'This patient does not have kidney disease. In advanced chronic kidney disease, the forearm and upper-arm veins are preserved for a future fistula and the IV goes in the dorsum of the hand (GEMAV); a fistula arm is not used for IV lines.',
+      ),
       tr(
         'Ajusta la profundidad de la imagen a unas dos veces la profundidad de la vena (Manual MSD).',
         'Set the image depth to about twice the depth of the vein (MSD Manual).',
@@ -1635,7 +1639,7 @@ export const CASES: CaseDef[] = [
       depth: 10.5,
       note: tr('Diámetro con compresor (2,6 mm sin él). Vena en el límite de la regla «3:1:3».', 'Diameter with a tourniquet (2.6 mm without). Vein at the limit of the “3:1:3” rule.'),
     },
-    // las mismas referencias, con todas sus cifras, están en docs/FUNDAMENTOS.md §13 (n.º 75–81)
+    // las mismas referencias, con todas sus cifras, están en docs/FUNDAMENTOS.md §13 (n.º 78–84)
     sources: [
       {
         label: tr(

@@ -356,15 +356,16 @@ The “Difficult peripheral IV” case (`piv_dificil`) and lesson 9 use the same
 
 ### 13.1 Indication and vein selection
 
-- **Indication:** the Society of Hospital Medicine recommends real-time ultrasound guidance for peripheral IV placement in adults with difficult venous access [75] **[Verify]** (read in a reprint during the earlier scoping study; the text could not be opened again in this review).
-- **“3:1:3” rule:** look for veins at least **3 mm in diameter**, **1 cm deep (1.5 cm at most)** and straight [76]. The source gives the third figure, the straight length, as “3 mm”, which looks like a typo; the simulator does not use it.
-- **Diameter:** in 180 cannulations between the antecubital fossa and the mid-humerus, first-attempt success was 63% (78/124) in veins ≥ 4 mm and 39% (22/56) in veins < 4 mm [81].
+- **Indication:** the Society of Hospital Medicine recommends real-time ultrasound guidance for peripheral IV placement in adults with difficult venous access, because it reduces procedure time, needle insertion attempts and needle redirections (recommendation 16) [78].
+- **“3:1:3” rule:** look for veins at least **3 mm in diameter**, **1 cm deep (1.5 cm at most)** and straight [79]. The source gives the third figure, the straight length, as “3 mm”, which looks like a typo; the simulator does not use it.
+- **Diameter:** in 180 cannulations between the antecubital fossa and the mid-humerus, first-attempt success was 63% (78/124) in veins ≥ 4 mm and 39% (22/56) in veins < 4 mm [84].
 - **Depth:**
-  - first-attempt success was 58% (96/165) between 0.3 and 1.5 cm deep and 27% (4/15) outside that range [81];
-  - with 151 catheters (20G, 48 mm), the probability that the line was still working at 48 h was 1.00 in veins less than 0.4 cm deep, 0.62 between 0.4 and 1.19 cm and 0.29 at 1.2 cm or deeper. Vein diameter made no difference [80].
-- **Location:** in the same study, survival was 0.83 in the antecubital fossa or forearm and 0.50 in the brachial region [80]. The vein in this case, above the elbow, is therefore a fallback target: when there is no other, how much catheter stays inside matters even more.
-- **Vein or artery:** veins are thin-walled, ovoid and more easily compressed by the probe than arteries. The two brachial veins lie on either side of the brachial artery. The chosen segment should be straight, wide, relatively superficial and distinct from the artery [77]. In the upper arm, the usual targets are the basilic and the deep brachial veins [76].
-- **Complications:** early line failure, hematoma, arterial puncture, nerve damage and infection [76]; extravasation, arterial puncture, hematoma and nerve damage [77].
+  - first-attempt success was 58% (96/165) between 0.3 and 1.5 cm deep and 27% (4/15) outside that range [84];
+  - with 151 catheters (20G, 48 mm), the probability that the line was still working at 48 h was 1.00 in veins less than 0.4 cm deep, 0.62 between 0.4 and 1.19 cm and 0.29 at 1.2 cm or deeper. Vein diameter made no difference [83].
+- **Location:** in the same study, survival was 0.83 in the antecubital fossa or forearm and 0.50 in the brachial region [83]. The vein in this case, above the elbow, is therefore a fallback target: when there is no other, how much catheter stays inside matters even more.
+- **Vein or artery:** veins are thin-walled, ovoid and more easily compressed by the probe than arteries. The two brachial veins lie on either side of the brachial artery. The chosen segment should be straight, wide, relatively superficial and distinct from the artery [80]. In the upper arm, the usual targets are the basilic and the deep brachial veins [79].
+- **Complications:** early line failure, hematoma, arterial puncture, nerve damage and infection [79]; extravasation, arterial puncture, hematoma and nerve damage [80].
+- **Vein preservation:** in advanced chronic kidney disease, the forearm and upper-arm veins are saved for a future fistula, and a fistula arm is not used for IV lines or blood draws: GEMAV recommends preserving the venous network and using the dorsum of the hand [3], and WikEM lists a fistula among the contraindications [79]. That is why the patient in the case **does not have kidney disease**. The basilic vein above the elbow, the target in the case, is also the vein used for a brachiobasilic AVF.
 
 **Values of the case** (teaching values, set to sit at the limit of the “3:1:3” rule):
 
@@ -378,12 +379,12 @@ The “Difficult peripheral IV” case (`piv_dificil`) and lesson 9 use the same
 
 ### 13.2 Catheter length inside the vein
 
-- **Pandurangadu 2018** [78]. Prospective study of 86 ultrasound-guided lines followed for 72 h. **All** lines with less than 30% of the catheter inside the vein failed, as did 32.4% of those with 30–64%, and **none** of those with 65% or more. Each additional 5% of catheter in the vein reduced the hazard of failure by 29% (HR 0.71; 95% CI 0.60–0.83).
-- **Bahl 2020** [79]. Randomized trial of 257 patients with 20G catheters: the 6.35 cm catheter lasted a median of 136 h and the 4.78 cm catheter 92 h. With more than 2.75 cm in the vein the median was 129 h; with 2.75 cm or less, 75 h.
-- Hence the advice to use long catheters, at least 1.75 inches (≈ 4.5 cm) [76].
+- **Pandurangadu 2018** [81]. Prospective study of 86 ultrasound-guided lines followed for 72 h. **All** lines with less than 30% of the catheter inside the vein failed, as did 32.4% of those with 30–64%, and **none** of those with 65% or more. Each additional 5% of catheter in the vein reduced the hazard of failure by 29% (HR 0.71; 95% CI 0.60–0.83).
+- **Bahl 2020** [82]. Randomized trial of 257 patients with 20G catheters: the 6.35 cm catheter lasted a median of 136 h and the 4.78 cm catheter 92 h. With more than 2.75 cm in the vein the median was 129 h; with 2.75 cm or less, 75 h.
+- Hence the advice to use long catheters, at least 1.75 inches (≈ 4.5 cm) [79].
 - **In the simulator:**
   - the **metric** is the catheter length inside the vein lumen, in mm and as a percentage of the catheter length;
-  - the assessment **criterion** is **≥ 65%** [78];
+  - the assessment **criterion** is **≥ 65%** [81]. It comes from a single observational study of 86 lines, and applying it to the 64 mm catheter as well is an extrapolation made by the simulator: Bahl 2020 gives the optimum as an absolute length (more than 2.75 cm inside the vein) [82];
   - the skin-to-vein path measures depth / sin(angle), so a deep vein “eats up” the catheter if you enter at a shallow angle. In the case, with the catheter inserted up to the hub:
 
 | Catheter | 45° | 40° | 35° | 30° | 25° |
@@ -393,24 +394,24 @@ The “Difficult peripheral IV” case (`piv_dificil`) and lesson 9 use the same
 
 ### 13.3 Equipment
 
-- **Over-the-needle catheter**, 20G and 48 mm by default: the one used by Fields 2012 [80] and the “standard long” (4.78 cm) of Bahl 2020; the 64 mm one is their “ultralong” (6.35 cm) [79].
-- **Gauges** and hub color: 22G, 0.9 mm, blue; 20G, 1.1 mm, pink; 18G, 1.3 mm, green [82].
-- Linear **probe** of 7.5 MHz or higher, with a **sterile transparent cover** and **single-use sterile lubricant**; **tourniquet** proximal to the insertion site [77]. Skin disinfected with chlorhexidine or alcohol [76].
-- **The simulator's own values**, with no source: the catheter tip sits 1.5 mm behind the needle tip (consistent with the advice to advance 1–2 mm after flashback [77]) and the inner needle is 0.3 mm smaller in diameter than the catheter.
+- **Over-the-needle catheter**, 20G and 48 mm by default: the one used by Fields 2012 [83] and the “standard long” (4.78 cm) of Bahl 2020; the 64 mm one is their “ultralong” (6.35 cm) [82].
+- **Gauges** and hub color: 22G, 0.9 mm, blue; 20G, 1.1 mm, pink; 18G, 1.3 mm, green [85].
+- Linear **probe** of 7.5 MHz or higher, with a **sterile transparent cover** and **single-use sterile lubricant**; **tourniquet** proximal to the insertion site [80]. Skin disinfected with chlorhexidine or alcohol [79].
+- **The simulator's own values**, with no source: the catheter tip sits 1.5 mm behind the needle tip (consistent with the advice to advance 1–2 mm after flashback [80]) and the inner needle is 0.3 mm smaller in diameter than the catheter.
 
 ### 13.4 Technique
 
 | Simulator step | Rationale |
 |---|---|
-| Vein located and measured, in short axis | Transverse view, with the probe marker to the operator's left and the image depth set to about twice the depth of the vein; preliminary survey with a tourniquet [77] |
-| Tourniquet applied | Proximal to the insertion site [77] |
-| Asepsis | Sterile cover and lubricant [77] |
-| Catheter placed | In short axis, the skin entry point lies at a distance from the probe equal to the vein depth, at about 45° [76]. You can also enter in short axis and switch to long axis, or do it all in long axis [76] |
-| Needle tip in the vein | The needle indents the wall and then pops through; flashback confirms the tip is in the lumen. The tip must be seen throughout the advance [77] |
-| Catheter tip in the vein | After flashback, advance 1–2 mm further so the catheter tip enters too [77]; “several millimeters up to a centimeter” under direct vision [76] |
-| Catheter threaded | Holding the needle still, the catheter is slid over it. It should go in easily: resistance or pain means it is not in the vein, so stop and cannulate at another site [77] |
-| Needle removed | After threading the catheter [77] |
-| Tourniquet released and saline flush | The tourniquet is released and the line is flushed with about 5 mL of saline, which should flow freely; if it extravasates, the catheter is removed and another site is used [77] |
+| Vein located and measured, in short axis | Transverse view, with the probe marker to the operator's left and the image depth set to about twice the depth of the vein; preliminary survey with a tourniquet [80] |
+| Tourniquet applied | Proximal to the insertion site [80] |
+| Asepsis | Sterile cover and lubricant [80] |
+| Catheter placed | In short axis, the skin entry point lies at a distance from the probe equal to the vein depth, at about 45° [79]. You can also enter in short axis and switch to long axis, or do it all in long axis [79] |
+| Needle tip in the vein | The needle indents the wall and then pops through; flashback confirms the tip is in the lumen. The tip must be seen throughout the advance [80] |
+| Catheter tip in the vein | After flashback, advance 1–2 mm further so the catheter tip enters too [80]; “several millimeters up to a centimeter” under direct vision [79] |
+| Catheter threaded | Holding the needle still, the catheter is slid over it. It should go in easily: resistance or pain means it is not in the vein, so stop and cannulate at another site [80] |
+| Needle removed | After threading the catheter [80] |
+| Tourniquet released and saline flush | The tourniquet is released and the line is flushed with about 5 mL of saline, which should flow freely; if it extravasates, the catheter is removed and another site is used [80] |
 
 ### 13.5 How it is implemented
 
@@ -497,14 +498,14 @@ The “Difficult peripheral IV” case (`piv_dificil`) and lesson 9 use the same
 
 ### Ultrasound-guided peripheral IV
 
-75. Franco-Sadud R et al. Recommendations on the Use of Ultrasound Guidance for Central and Peripheral Vascular Access in Adults: A Position Statement of the Society of Hospital Medicine. *J Hosp Med* 2019. Reprint: https://mdedge.com/content/recommendations-use-ultrasound-guidance-central-and-peripheral-vascular-access-adults
-76. WikEM. Ultrasound-assisted peripheral line placement (revision of 17 April 2024). https://wikem.org/wiki/Ultrasound-assisted_peripheral_line_placement
-77. Liu YT. How To Do Ultrasound-Guided Peripheral Intravenous Catheter Insertion. *MSD Manual, Professional Version* (reviewed October 2025). https://www.msdmanuals.com/professional/critical-care-medicine/how-to-do-peripheral-vascular-procedures/how-to-do-peripheral-vein-cannulation-ultrasound-guided
-78. Pandurangadu AV, Tucker J, Brackney AR, Bahl A. Ultrasound-guided intravenous catheter survival impacted by amount of catheter residing in the vein. *Emerg Med J* 2018;35(9):550–555. doi:10.1136/emermed-2017-206803 (abstract; PMID 30021833).
-79. Bahl A, Hijazi M, Chen NW, Lachapelle-Clavette L, Price J. Ultralong Versus Standard Long Peripheral Intravenous Catheters: A Randomized Controlled Trial of Ultrasonographically Guided Catheter Survival. *Ann Emerg Med* 2020;76(2):134–142. doi:10.1016/j.annemergmed.2019.11.013 (abstract; PMID 31955940).
-80. Fields JM, Dean AJ, Todman RW et al. The effect of vessel depth, diameter, and location on ultrasound-guided peripheral intravenous catheter longevity. *Am J Emerg Med* 2012;30(7):1134–1140. doi:10.1016/j.ajem.2011.07.027 (abstract; PMID 22078967).
-81. Witting MD, Schenkel SM, Lawner BJ, Euerle BD. Effects of vein width and depth on ultrasound-guided peripheral intravenous success rates. *J Emerg Med* 2010;39(1):70–75. doi:10.1016/j.jemermed.2009.01.003 (abstract; PMID 19272730).
-82. Doyle E. *Paediatric Anaesthesia*. Oxford University Press, 2007, p. 110 (gauge, diameter and color of peripheral catheters; cited in Wikipedia, “Peripheral venous catheter”).
+78. Franco-Sadud R et al. Recommendations on the Use of Ultrasound Guidance for Central and Peripheral Vascular Access in Adults: A Position Statement of the Society of Hospital Medicine. *J Hosp Med* 2019;14(9). doi:10.12788/jhm.3287. Reprint: https://mdedge.com/content/recommendations-use-ultrasound-guidance-central-and-peripheral-vascular-access-adults
+79. WikEM. Ultrasound-assisted peripheral line placement (revision of 17 April 2024). https://wikem.org/wiki/Ultrasound-assisted_peripheral_line_placement
+80. Liu YT. How To Do Ultrasound-Guided Peripheral Intravenous Catheter Insertion. *MSD Manual, Professional Version* (reviewed October 2025). https://www.msdmanuals.com/professional/critical-care-medicine/how-to-do-peripheral-vascular-procedures/how-to-do-peripheral-vein-cannulation-ultrasound-guided
+81. Pandurangadu AV, Tucker J, Brackney AR, Bahl A. Ultrasound-guided intravenous catheter survival impacted by amount of catheter residing in the vein. *Emerg Med J* 2018;35(9):550–555. doi:10.1136/emermed-2017-206803 (abstract; PMID 30021833).
+82. Bahl A, Hijazi M, Chen NW, Lachapelle-Clavette L, Price J. Ultralong Versus Standard Long Peripheral Intravenous Catheters: A Randomized Controlled Trial of Ultrasonographically Guided Catheter Survival. *Ann Emerg Med* 2020;76(2):134–142. doi:10.1016/j.annemergmed.2019.11.013 (abstract; PMID 31955940).
+83. Fields JM, Dean AJ, Todman RW et al. The effect of vessel depth, diameter, and location on ultrasound-guided peripheral intravenous catheter longevity. *Am J Emerg Med* 2012;30(7):1134–1140. doi:10.1016/j.ajem.2011.07.027 (abstract; PMID 22078967).
+84. Witting MD, Schenkel SM, Lawner BJ, Euerle BD. Effects of vein width and depth on ultrasound-guided peripheral intravenous success rates. *J Emerg Med* 2010;39(1):70–75. doi:10.1016/j.jemermed.2009.01.003 (abstract; PMID 19272730).
+85. Doyle E. *Paediatric Anaesthesia*. Oxford University Press, 2007, p. 110 (gauge, diameter and color of peripheral catheters; cited in Wikipedia, “Peripheral venous catheter”).
 
 ### Cannulation complications
 

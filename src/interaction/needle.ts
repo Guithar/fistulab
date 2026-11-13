@@ -667,8 +667,17 @@ export class Needle {
     return q.struct === v && q.inLumen;
   }
 
+  /** Vaso en cuya luz está la punta del catéter (null: fuera de un vaso, o la punta aún no ha entrado). */
+  catheterVessel(model: AnatomyModel): Structure | null {
+    const c = this.cath;
+    if (!c) return null;
+    if (c.stage !== 'montado') return c.outside ? null : c.vessel;
+    return this.catheterTipInLumen(model) ? this.lumenVessel() : null;
+  }
+
   /**
-   * Longitud de catéter dentro de la luz del vaso (mm). Con el catéter montado se mide sobre el trayecto
+   * Longitud de catéter dentro de la luz de la vena (mm; 0 si el vaso es una arteria: no es una vía
+   * venosa). Con el catéter montado se mide sobre el trayecto
    * de la aguja; una vez deslizado, es la longitud introducida menos el tramo de piel a pared, que se
    * fija al empezar a deslizar (el catéter acompaña a la vena si esta cambia de calibre al soltar el compresor).
    */
@@ -677,9 +686,9 @@ export class Needle {
     if (!c) return 0;
     // décimas de milímetro: el mismo valor redondea igual en la línea de estado, en la métrica y en la evaluación
     const tenths = (mm: number) => Math.round(Math.max(0, mm) * 10) / 10;
-    if (c.stage !== 'montado') return c.vessel && !c.outside ? tenths(c.baseDepth - CATHETER_SETBACK + c.slid - c.lumenEntry) : 0;
+    if (c.stage !== 'montado') return c.vessel && !c.outside && c.vessel.def.kind === 'vein' ? tenths(c.baseDepth - CATHETER_SETBACK + c.slid - c.lumenEntry) : 0;
     const v = this.lumenVessel();
-    if (!v) return 0;
+    if (!v || v.def.kind !== 'vein') return 0;
     const tipS = this.depth - CATHETER_SETBACK;
     const entryS = this.lumenEntryArc(model, v);
     return tenths(tipS - entryS);
@@ -740,7 +749,16 @@ export class Needle {
         this.inVessel = v;
         this.tentAmount = 0;
         this.tentStruct = null;
-        this.emit(t, 'cath-advance', tr(`El catéter se desliza sin resistencia por la luz de ${v.def.name}`, `The catheter slides without resistance along the lumen of ${v.def.name}`), 'ok', v.def.id);
+        if (v.def.kind === 'vein')
+          this.emit(t, 'cath-advance', tr(`El catéter se desliza sin resistencia por la luz de ${v.def.name}`, `The catheter slides without resistance along the lumen of ${v.def.name}`), 'ok', v.def.id);
+        else
+          this.emit(
+            t,
+            'cath-advance',
+            tr(`El catéter se desliza por la luz de ${v.def.name}, que no es una vena: retíralo`, `The catheter is sliding along the lumen of ${v.def.name}, which is not a vein: remove it`),
+            'error',
+            v.def.id,
+          );
       } else {
         this.emit(
           t,
@@ -844,10 +862,12 @@ export class Needle {
         this.emit(
           t,
           'needle-out',
-          v
-            ? tr(`Aguja retirada: el catéter queda en la luz de ${v.def.name}`, `Needle removed: the catheter stays in the lumen of ${v.def.name}`)
-            : tr('Aguja retirada: el catéter no está en una vena', 'Needle removed: the catheter is not in a vein'),
-          v ? 'ok' : 'warn',
+          !v
+            ? tr('Aguja retirada: el catéter no está en una vena', 'Needle removed: the catheter is not in a vein')
+            : v.def.kind === 'vein'
+              ? tr(`Aguja retirada: el catéter queda en la luz de ${v.def.name}`, `Needle removed: the catheter stays in the lumen of ${v.def.name}`)
+              : tr(`Aguja retirada: el catéter ha quedado en ${v.def.name}, que no es una vena. Retíralo`, `Needle removed: the catheter has been left in ${v.def.name}, which is not a vein. Remove it`),
+          !v ? 'warn' : v.def.kind === 'vein' ? 'ok' : 'error',
           v?.def.id,
         );
       }

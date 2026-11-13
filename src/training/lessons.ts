@@ -509,8 +509,8 @@ export const LESSONS: Lesson[] = [
         ),
         check: (c) => c.collapse(c.access()?.def.id ?? '') > 0.6,
         hint: tr(
-          'Con el compresor puesto la vena está distendida y no se colapsa: si lo tienes aplicado, suéltalo antes.',
-          'With the tourniquet on, the vein is distended and will not collapse: if it is applied, release it first.',
+          'Con el compresor puesto la vena está distendida y cuesta más colapsarla: si lo tienes aplicado, suéltalo antes.',
+          'With the tourniquet on, the vein is distended and harder to collapse: if it is applied, release it first.',
         ),
       },
       {

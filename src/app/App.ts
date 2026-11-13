@@ -993,11 +993,13 @@ export class App {
   private pivChecklistState(n: Needle): NonNullable<ChecklistState['piv']> {
     const c = n.cath!;
     const mm = n.placed ? n.catheterInVein(this.model) : 0;
+    // en una arteria el catéter está en una luz, pero no en una vena: esos pasos no se marcan
+    const inVein = n.placed && n.catheterVessel(this.model)?.def.kind === 'vein';
     return {
       tourniquetAtPuncture: n.inserted ? this.tqAtPuncture : this.tourniquet,
-      catheterTipInVein: n.placed && n.catheterTipInLumen(this.model),
+      catheterTipInVein: inVein,
       inVeinPct: mm > 0 ? catheterPct(mm, c.length) : null,
-      threaded: n.placed && c.stage !== 'montado' && !c.outside,
+      threaded: inVein && c.stage !== 'montado',
       needleOut: n.placed && n.needleOut,
       flushed: c.flushed,
     };

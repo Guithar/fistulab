@@ -534,6 +534,47 @@ describe('catéter sobre aguja: máquina de estados', () => {
     expect(n.catheterInVein(model)).toBe(0);
   });
 
+  it('en la arteria humeral el catéter no cuenta como «en vena» y los avisos son de error', () => {
+    const { arm, model } = build('piv_dificil');
+    const n = new Needle('venosa');
+    n.setCatheter(20, 64);
+    const events: { type: string; severity: string }[] = [];
+    n.onEvent = (e) => events.push({ type: e.type, severity: e.severity });
+    const ids = new Set(['v_basilica']);
+    let t = 0;
+    // entrada casi vertical: se busca el punto desde el que la aguja llega a la arteria
+    let hit = false;
+    for (let th = -75; th <= -5 && !hit; th += 2.5) {
+      n.place(arm, 335, th, 0, 70);
+      for (let i = 0; i < 330 && n.state !== 'hueso'; i++) {
+        n.depth = Math.min(n.maxDepth, n.depth + 0.2);
+        n.update(model, (t += 0.02), ids);
+        if (n.state === 'luz' && n.inVessel?.def.kind === 'artery') {
+          hit = true;
+          break;
+        }
+      }
+    }
+    expect(hit).toBe(true);
+    for (let i = 0; i < 40 && !n.catheterTipInLumen(model) && n.state === 'luz'; i++) {
+      n.depth += 0.1;
+      n.update(model, (t += 0.02), ids);
+    }
+    expect(n.catheterTipInLumen(model)).toBe(true);
+    expect(n.catheterVessel(model)?.def.kind).toBe('artery');
+    expect(n.catheterInVein(model)).toBe(0);
+    events.length = 0;
+    expect(n.slideCatheter(model, 10, (t += 0.02))).toBe(true);
+    expect(events).toContainEqual({ type: 'cath-advance', severity: 'error' });
+    expect(n.catheterInVein(model)).toBe(0);
+    n.depth = -3;
+    n.update(model, (t += 0.02), ids);
+    expect(n.needleOut).toBe(true);
+    expect(events).toContainEqual({ type: 'needle-out', severity: 'error' });
+    expect(n.catheterVessel(model)?.def.kind).toBe('artery');
+    expect(n.catheterInVein(model)).toBe(0);
+  });
+
   it('retirar la aguja sin haber deslizado el catéter lo saca todo', () => {
     const { n, c, events, withdraw } = pivToFlash();
     withdraw();

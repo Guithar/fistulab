@@ -74,11 +74,12 @@ export function zoneOk(s: Pick<ChecklistState, 'probeX' | 'access' | 'otherTipX'
 }
 
 /**
- * Pasos de la vía periférica ecoguiada con catéter sobre aguja, en el orden del Manual MSD
+ * Pasos de la vía periférica ecoguiada con catéter sobre aguja, en el orden, simplificado, del Manual MSD
  * («How To Do Ultrasound-Guided Peripheral Intravenous Catheter Insertion»): compresor, asepsia, reflujo,
  * avanzar 1–2 mm más para que entre la punta del catéter, deslizar el catéter con la aguja quieta, retirar
  * la aguja, soltar el compresor y lavar con suero. La longitud de catéter dentro de la vena (≥ 65 %) es de
- * Pandurangadu 2018.
+ * Pandurangadu 2018. El manual retira el compresor tras la exploración inicial y lo vuelve a poner después
+ * de preparar la piel; aquí se mantiene puesto desde la medida hasta que se retira la aguja.
  */
 export function pivChecklist(s: ChecklistState): ChecklistItem[] {
   const p = s.piv!;
