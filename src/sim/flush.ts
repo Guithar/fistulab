@@ -12,6 +12,8 @@
 /** volumen y duración típicos del lavado: 10 mL en ~2,5 s (≈ 4 mL/s) */
 export const FLUSH_ML = 10;
 export const FLUSH_INJECT_S = 2.5;
+/** por un catéter venoso periférico se lava con unos 5 mL (Manual MSD) */
+export const PIV_FLUSH_ML = 5;
 /** decaimiento del chorro libre dentro del vaso (mm, ≈ 3–5 diámetros internos) */
 export const JET_LEN_MM = 4;
 

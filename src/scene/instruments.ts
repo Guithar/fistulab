@@ -1,5 +1,5 @@
 /**
- * Instrumental 3D: transductor lineal y aguja de fístula (unidades: mm).
+ * Instrumental 3D: transductor lineal, aguja de fístula y catéter periférico sobre aguja (unidades: mm).
  */
 import {
   BufferAttribute,
@@ -131,10 +131,49 @@ export const GAUGES: Record<number, { od: number; label: string; color: string }
   17: { od: 1.473, label: '17G', color: '#d9a21a' },
 };
 
+/**
+ * Catéteres venosos periféricos: diámetro exterior y color del cono de cada calibre
+ * (docs/FUNDAMENTOS.md §13.3).
+ */
+export const CATHETER_GAUGES: Record<number, { od: number; label: string; color: string }> = {
+  18: { od: 1.3, label: '18G', color: '#3f9d4f' },
+  20: { od: 1.1, label: '20G', color: '#e47fa6' },
+  22: { od: 0.9, label: '22G', color: '#2f6fd6' },
+};
+
+/** Longitudes de catéter (mm): «largo» de 4,78 cm y «extralargo» de 6,35 cm (Bahl 2020). */
+export const CATHETER_LENGTHS = [48, 64];
+
+/** La punta del catéter queda este tramo por detrás de la punta de la aguja (mm). */
+export const CATHETER_SETBACK = 1.5;
+
 export interface NeedleMesh {
   group: Group;
   setFlash(level: number, arterial: boolean): void;
   setLength(len: number): void;
+  /** grupo que sigue a la aguja (punta y dirección); por defecto, `group` */
+  needleGroup?: Group;
+  /** catéter sobre aguja: trayecto del catéter, del cono a la punta, y si la aguja sigue dentro */
+  setCatheter?(path: Vector3[], needleIn: boolean): void;
+}
+
+/** Cánula de acero con bisel (≈ 18°). Origen en la punta; +Z hacia el cono. */
+function bevelShaft(r: number, length: number): CylinderGeometry {
+  const geo = new CylinderGeometry(r, r, length, 24, 8, false);
+  geo.rotateX(Math.PI / 2);
+  geo.translate(0, 0, length / 2);
+  const p = geo.getAttribute('position') as BufferAttribute;
+  const bevelLen = ((2 * r) / Math.tan((18 * Math.PI) / 180)) * 0.5;
+  for (let i = 0; i < p.count; i++) {
+    const z = p.getZ(i);
+    if (z < 1e-3) {
+      // bisel hacia arriba (+Y): el filo queda abajo, la abertura mira hacia arriba
+      const y = p.getY(i);
+      p.setZ(i, ((y + r) / (2 * r)) * bevelLen);
+    }
+  }
+  geo.computeVertexNormals();
+  return geo;
 }
 
 /**
@@ -148,21 +187,7 @@ export function buildNeedle(gauge = 15, length = 25, role: 'arterial' | 'venosa'
   const r = od / 2;
   const steel = new MeshPhysicalMaterial({ color: '#dfe3e8', metalness: 1, roughness: 0.18, clearcoat: 0.2 });
   // cánula con bisel (18° aprox)
-  const shaftGeo = new CylinderGeometry(r, r, length, 24, 8, false);
-  shaftGeo.rotateX(Math.PI / 2);
-  shaftGeo.translate(0, 0, length / 2);
-  const p = shaftGeo.getAttribute('position') as BufferAttribute;
-  const bevelLen = od / Math.tan((18 * Math.PI) / 180) * 0.5;
-  for (let i = 0; i < p.count; i++) {
-    const z = p.getZ(i);
-    if (z < 1e-3) {
-      // bisel hacia arriba (+Y): el filo queda abajo, la abertura mira hacia arriba
-      const y = p.getY(i);
-      p.setZ(i, ((y + r) / (2 * r)) * bevelLen);
-    }
-  }
-  shaftGeo.computeVertexNormals();
-  const shaft = new Mesh(shaftGeo, steel);
+  const shaft = new Mesh(bevelShaft(r, length), steel);
   g.add(shaft);
   const wingCol = role === 'arterial' ? '#d23b3b' : '#2f6fd6';
   const plastic = new MeshPhysicalMaterial({ color: wingCol, roughness: 0.4, clearcoat: 0.5, transparent: true, opacity: 0.95 });
@@ -199,6 +224,103 @@ export function buildNeedle(gauge = 15, length = 25, role: 'arterial' | 'venosa'
     setLength(len: number) {
       hubGroup.position.z = len;
       shaft.scale.z = len / length;
+    },
+  };
+}
+
+/**
+ * Catéter venoso periférico sobre aguja. La aguja (acero, con cámara de reflujo) va en `needleGroup`,
+ * con el origen en su punta y +Z hacia atrás; el catéter (plástico, con el cono del color del calibre)
+ * se dibuja en coordenadas del brazo a lo largo de su trayecto, porque al deslizarlo deja de seguir
+ * a la aguja y se curva por la luz de la vena.
+ */
+export function buildCatheterNeedle(gauge = 20, cathLength = 48): NeedleMesh {
+  const g = new Group();
+  g.name = 'cateter';
+  const spec = CATHETER_GAUGES[gauge] ?? CATHETER_GAUGES[20];
+  const rc = spec.od / 2;
+  // aguja
+  const ng = new Group();
+  g.add(ng);
+  const steel = new MeshPhysicalMaterial({ color: '#dfe3e8', metalness: 1, roughness: 0.18, clearcoat: 0.2 });
+  // la aguja sobresale por detrás del cono del catéter hasta su cámara de reflujo
+  const BACK = 13;
+  const base = cathLength + CATHETER_SETBACK + BACK;
+  const shaft = new Mesh(bevelShaft(Math.max(0.25, rc - 0.15), base), steel);
+  ng.add(shaft);
+  const hubGroup = new Group();
+  hubGroup.position.z = base;
+  ng.add(hubGroup);
+  const chamberMat = new MeshPhysicalMaterial({ color: '#f0f4f6', roughness: 0.15, transparent: true, opacity: 0.55, clearcoat: 1 });
+  const chamber = new Mesh(new CylinderGeometry(2.4, 2.4, 18, 20), chamberMat);
+  chamber.rotation.x = Math.PI / 2;
+  chamber.position.z = 9;
+  hubGroup.add(chamber);
+  const cap = new Mesh(new CylinderGeometry(2.9, 2.9, 4, 20), new MeshStandardMaterial({ color: '#e9edf1', roughness: 0.45 }));
+  cap.rotation.x = Math.PI / 2;
+  cap.position.z = 20;
+  hubGroup.add(cap);
+  // catéter: tubo a lo largo del trayecto y cono en su extremo posterior
+  const tubeMat = new MeshPhysicalMaterial({ color: '#cfe6f2', roughness: 0.3, transparent: true, opacity: 0.8, clearcoat: 0.6 });
+  const tube = new Mesh(new BufferGeometry(), tubeMat);
+  tube.visible = false;
+  g.add(tube);
+  const hubMat = new MeshPhysicalMaterial({ color: spec.color, roughness: 0.4, clearcoat: 0.5, transparent: true, opacity: 0.92 });
+  const hub = new Group();
+  const cone = new Mesh(new CylinderGeometry(2.7, 1.5, 10, 20), hubMat);
+  cone.rotation.x = Math.PI / 2;
+  cone.position.z = 5;
+  hub.add(cone);
+  const wings = new Mesh(new RoundedBoxGeometry(15, 0.8, 6, 2, 0.35), hubMat);
+  wings.position.set(0, -1.6, 6);
+  hub.add(wings);
+  hub.visible = false;
+  g.add(hub);
+  g.traverse((o) => {
+    if ((o as Mesh).isMesh) (o as Mesh).castShadow = true;
+  });
+  let sig = '';
+  const zAxis = new Vector3(0, 0, 1);
+  const back = new Vector3();
+  return {
+    group: g,
+    needleGroup: ng,
+    setFlash(level: number, arterial: boolean) {
+      const c = new Color('#f0f4f6').lerp(new Color(arterial ? '#c4161c' : '#6d0f16'), Math.min(1, level));
+      chamberMat.color.copy(c);
+      chamberMat.opacity = 0.55 + 0.4 * Math.min(1, level);
+    },
+    setLength(len: number) {
+      const total = len + BACK;
+      hubGroup.position.z = total;
+      shaft.scale.z = total / base;
+    },
+    setCatheter(path: Vector3[], needleIn: boolean) {
+      ng.visible = needleIn;
+      // puntos distintos (una curva con puntos repetidos no tiene tangente)
+      const pts: Vector3[] = [];
+      for (const p of path) if (!pts.length || pts[pts.length - 1].distanceTo(p) > 0.3) pts.push(p);
+      if (pts.length < 2) {
+        tube.visible = false;
+        hub.visible = false;
+        return;
+      }
+      tube.visible = true;
+      hub.visible = true;
+      const a = pts[0];
+      const b = pts[pts.length - 1];
+      const key = `${pts.length}|${a.x.toFixed(2)},${a.y.toFixed(2)},${a.z.toFixed(2)}|${b.x.toFixed(2)},${b.y.toFixed(2)},${b.z.toFixed(2)}`;
+      if (key !== sig) {
+        sig = key;
+        let len = 0;
+        for (let i = 1; i < pts.length; i++) len += pts[i].distanceTo(pts[i - 1]);
+        tube.geometry.dispose();
+        tube.geometry = new TubeGeometry(new CatmullRomCurve3(pts, false, 'centripetal'), Math.min(96, Math.max(8, Math.round(len / 1.2))), rc, 8, false);
+      }
+      // cono: en el extremo posterior, orientado hacia atrás
+      back.copy(pts[0]).sub(pts[1]).normalize();
+      hub.position.copy(pts[0]);
+      hub.quaternion.setFromUnitVectors(zAxis, back);
     },
   };
 }

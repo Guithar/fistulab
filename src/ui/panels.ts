@@ -4,11 +4,11 @@
 import { TISSUES } from '../anatomy/tissues';
 import type { App } from '../app/App';
 import { LOCALE, tr } from '../i18n';
-import { roleLabel, type NeedleEvent } from '../interaction/needle';
+import { deviceLabel, roleLabel, type NeedleEvent } from '../interaction/needle';
 import { BUILD, SITE } from '../site';
 import { procedureChecklist } from '../training/checklist';
 import { LESSONS } from '../training/lessons';
-import { grade } from '../training/metrics';
+import { CATHETER_MIN_PCT, grade } from '../training/metrics';
 
 const LEVEL_ICON: Record<string, string> = { good: '✔', fair: '◐', bad: '✖', info: 'ℹ' };
 
@@ -55,7 +55,8 @@ export class Panels {
         <ul>${c.findings.map((o) => `<li>${o}</li>`).join('')}</ul>
         ${exp ? `<div class="kv">${exp.diameter ? `<span>${tr('Diámetro', 'Diameter')}</span><span>≈ ${exp.diameter} mm</span>` : ''}${exp.depth ? `<span>${tr('Profundidad (pared anterior)', 'Depth (anterior wall)')}</span><span>≈ ${exp.depth} mm</span>` : ''}${exp.qa ? `<span>${tr('Qa (humeral)', 'Qa (brachial)')}</span><span>≈ ${exp.qa} mL/min</span>` : ''}${exp.mature !== undefined ? `<span>${tr('¿Madura?', 'Mature?')}</span><span>${exp.mature ? tr('Sí', 'Yes') : 'No'}</span>` : ''}${exp.note ? `<span>${tr('Nota', 'Note')}</span><span>${exp.note}</span>` : ''}</div>` : ''}
       </details>
-      ${c.access ? `<h4>${tr('Acceso', 'Access')}</h4><div class="kv"><span>${tr('Zona recomendada', 'Recommended zone')}</span><span>${(c.access.zone[0] / 10).toFixed(0)}–${(c.access.zone[1] / 10).toFixed(0)} ${tr('cm desde la muñeca', 'cm from the wrist')}</span><span>${tr('Ángulo recomendado', 'Recommended angle')}</span><span>${c.access.angle}°</span>${c.access.anastomosisX !== undefined ? `<span>Anastomosis</span><span>${(c.access.anastomosisX / 10).toFixed(1)} cm</span>` : ''}${(c.access.avoid ?? []).map((a) => `<span>${tr('Evitar', 'Avoid')} ${(a.x0 / 10).toFixed(0)}–${(a.x1 / 10).toFixed(0)} cm</span><span>${a.reason}</span>`).join('')}</div>` : ''}
+      ${c.access && c.procedure === 'piv' ? `<h4>${tr('Vena diana', 'Target vein')}</h4><div class="kv"><span>${tr('Tramo recto', 'Straight segment')}</span><span>${(c.access.zone[0] / 10).toFixed(0)}–${(c.access.zone[1] / 10).toFixed(0)} ${tr('cm desde la muñeca', 'cm from the wrist')}</span><span>${tr('Ángulo de inserción', 'Insertion angle')}</span><span>≈ ${c.access.angle}°</span><span>${tr('Catéter dentro de la vena', 'Catheter inside the vein')}</span><span>≥ ${CATHETER_MIN_PCT} %</span></div>` : c.access ? `<h4>${tr('Acceso', 'Access')}</h4><div class="kv"><span>${tr('Zona recomendada', 'Recommended zone')}</span><span>${(c.access.zone[0] / 10).toFixed(0)}–${(c.access.zone[1] / 10).toFixed(0)} ${tr('cm desde la muñeca', 'cm from the wrist')}</span><span>${tr('Ángulo recomendado', 'Recommended angle')}</span><span>${c.access.angle}°</span>${c.access.anastomosisX !== undefined ? `<span>Anastomosis</span><span>${(c.access.anastomosisX / 10).toFixed(1)} cm</span>` : ''}${(c.access.avoid ?? []).map((a) => `<span>${tr('Evitar', 'Avoid')} ${(a.x0 / 10).toFixed(0)}–${(a.x1 / 10).toFixed(0)} cm</span><span>${a.reason}</span>`).join('')}</div>` : ''}
+      ${c.sources?.length ? `<h4>${tr('Fuentes', 'Sources')}</h4><ul class="sources">${c.sources.map((s) => `<li><a href="${s.url}" target="_blank" rel="noopener">${s.label}</a></li>`).join('')}</ul><p class="muted">${tr(`Todas las cifras, con su referencia, en los <a href="${SITE.docs}FUNDAMENTOS.md" target="_blank" rel="noopener">fundamentos</a>.`, `All the figures, with their references, are in the <a href="${SITE.docs}en/FUNDAMENTALS.md" target="_blank" rel="noopener">fundamentals</a>.`)}</p>` : ''}
       <p class="muted" style="margin-top:10px">${tr('Herramienta educativa. No utilizar para decisiones clínicas.', 'Educational tool. Not for clinical decision-making.')}</p>`;
   }
 
@@ -78,9 +79,9 @@ export class Panels {
       <h4>${tr('Pasos de la punción', 'Cannulation steps')}</h4>
       <ul class="steps" id="mSteps"></ul>
       <div class="metric-grid" id="mGrid"></div>
-      ${checks.length ? `<h4>${tr('Evaluación de la punción', 'Cannulation assessment')} (${roleLabel(n.role)})</h4><ul class="checklist">${checks
+      ${checks.length ? `<h4>${n.cath ? tr('Evaluación de la vía periférica', 'Peripheral IV assessment') : tr('Evaluación de la punción', 'Cannulation assessment')} (${n.cath ? deviceLabel(n) : roleLabel(n.role)})</h4><ul class="checklist">${checks
         .map((c) => `<li class="lv-${c.ok === null ? 'info' : c.ok ? 'good' : 'bad'}"><span class="ic">${c.ok === null ? 'ℹ' : c.ok ? '✔' : '✖'}</span><span>${c.label} <span class="muted">— ${c.detail}</span></span></li>`)
-        .join('')}</ul>` : app.dt(tr('<p class="muted">Pulsa <b>{{Confirmar punción</b> (Intro)|Confirmar</b>}} cuando la aguja esté en posición para evaluarla según las guías.</p>', '<p class="muted">Press <b>{{Confirm cannulation</b> (Enter)|Confirm</b>}} when the needle is in position to have it assessed against the guidelines.</p>'))}
+        .join('')}</ul>` : app.dt(n.cath ? tr('<p class="muted">Pulsa <b>{{Confirmar vía</b> (Intro)|Confirmar</b>}} cuando el catéter esté en la vena, con la aguja retirada y lavado con suero, para evaluar la vía.</p>', '<p class="muted">Press <b>{{Confirm line</b> (Enter)|Confirm</b>}} once the catheter is in the vein, with the needle removed and flushed with saline, to have the line assessed.</p>') : tr('<p class="muted">Pulsa <b>{{Confirmar punción</b> (Intro)|Confirmar</b>}} cuando la aguja esté en posición para evaluarla según las guías.</p>', '<p class="muted">Press <b>{{Confirm cannulation</b> (Enter)|Confirm</b>}} when the needle is in position to have it assessed against the guidelines.</p>'))}
       <h4>${tr('Registro de eventos', 'Event log')}</h4>
       <div class="eventlog" id="mLog">${this.log
         .slice(-60)
@@ -110,7 +111,11 @@ export class Panels {
     }
     const s = this.app.metrics.snapshot();
     const m = (v: string, l: string, cls = '') => `<div class="metric ${cls}"><div class="v">${v}</div><div class="l">${l}</div></div>`;
+    // vía periférica: longitud de catéter dentro de la vena (≥ 65 % de su longitud; con < 30 % la vía falla)
+    const pct = s.catheterPct;
+    const cath = pct === null ? [] : [m(`${s.catheterInVein.toFixed(0)} mm · ${pct} %`, tr('Catéter dentro de la vena', 'Catheter inside the vein'), s.catheterInVein <= 0 ? '' : pct >= CATHETER_MIN_PCT ? 'good' : pct >= 30 ? 'warn' : 'bad')];
     grid.innerHTML = [
+      ...cath,
       m(`${s.elapsed.toFixed(0)} s`, tr('Tiempo total', 'Total time')),
       m(s.timeToFlash !== null ? `${s.timeToFlash.toFixed(1)} s` : '—', tr('Piel → reflujo', 'Skin → flashback')),
       m(String(s.skinPunctures), tr('Punciones cutáneas', 'Skin punctures'), s.skinPunctures > 1 ? 'warn' : ''),
@@ -286,7 +291,7 @@ export class Panels {
             <li>Arrastra la <b>sonda</b> sobre la piel o usa <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd>. Gira con <kbd>Q</kbd>/<kbd>E</kbd> y presiona con <kbd>X</kbd>.</li>
             <li>Pulsa <kbd>1</kbd> para localizar la vena en transversal y <kbd>2</kbd> para verla en longitudinal.</li>
             <li>En el modo <b>Punción</b>, sigue la lista de <b>pasos</b>: se marca sola. Coloca la aguja con <kbd>N</kbd> (en plano si la sonda está en longitudinal, el abordaje preferido), avanza con <kbd>↑</kbd> viendo la punta y confirma con <kbd>Intro</kbd>.</li>
-            <li>En <b>Aprendizaje</b> tienes 8 lecciones guiadas que se corrigen solas.</li>
+            <li>En <b>Aprendizaje</b> tienes 9 lecciones guiadas que se corrigen solas, incluida la vía periférica ecoguiada.</li>
           </ol>
           <p class="muted">Empiezas en <b>modo básico</b>, con los controles de la punción. El botón <b>Más controles</b>, a la derecha de la consola, muestra todos (Doppler, PW, ajustes de imagen).</p>
         </div>
@@ -312,7 +317,7 @@ export class Panels {
             <li>Drag the <b>probe</b> over the skin or use <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd>. Rotate with <kbd>Q</kbd>/<kbd>E</kbd> and apply pressure with <kbd>X</kbd>.</li>
             <li>Press <kbd>1</kbd> to find the vein in short axis and <kbd>2</kbd> to view it in long axis.</li>
             <li>In <b>Cannulation</b> mode, follow the list of <b>steps</b>: it checks itself off. Place the needle with <kbd>N</kbd> (in-plane if the probe is in long axis, the preferred approach), advance with <kbd>↑</kbd> while watching the tip, and confirm with <kbd>Enter</kbd>.</li>
-            <li>In <b>Learn</b> you will find 8 guided lessons that are checked automatically.</li>
+            <li>In <b>Learn</b> you will find 9 guided lessons that are checked automatically, including the ultrasound-guided peripheral IV.</li>
           </ol>
           <p class="muted">You start in <b>basic mode</b>, with the cannulation controls. The <b>More controls</b> button, on the right of the console, shows them all (Doppler, PW, image settings).</p>
         </div>
@@ -366,6 +371,7 @@ export class Panels {
             <tr><td><kbd>J</kbd></td><td>Lavar con suero: en la luz se ven microburbujas arrastradas por el flujo (y un chorro en Doppler color); fuera, infiltración</td></tr>
             <tr><td><kbd>←</kbd>/<kbd>→</kbd></td><td>Rumbo (dirección)</td></tr>
             <tr><td><kbd>RePág</kbd>/<kbd>AvPág</kbd></td><td>Ángulo de inserción</td></tr>
+            <tr><td><kbd>U</kbd></td><td>Vía periférica (caso «Vía periférica difícil»): deslizar el catéter sobre la aguja. Después, <kbd>↓</kbd> o <b>Retirar aguja</b> saca la aguja y deja el catéter</td></tr>
             <tr><td><kbd>Intro</kbd></td><td>Confirmar la punción (evaluación)</td></tr>
             <tr><td><kbd>K</kbd></td><td>Compresor on/off</td></tr>
           </table>
@@ -423,6 +429,7 @@ export class Panels {
             <tr><td><kbd>J</kbd></td><td>Saline flush: in the lumen, microbubbles are swept along by the flow (and a jet on color Doppler); outside it, infiltration</td></tr>
             <tr><td><kbd>←</kbd>/<kbd>→</kbd></td><td>Heading (direction)</td></tr>
             <tr><td><kbd>PgUp</kbd>/<kbd>PgDn</kbd></td><td>Insertion angle</td></tr>
+            <tr><td><kbd>U</kbd></td><td>Peripheral IV (“Difficult peripheral IV” case): slide the catheter over the needle. Then <kbd>↓</kbd> or <b>Remove needle</b> takes the needle out and leaves the catheter</td></tr>
             <tr><td><kbd>Enter</kbd></td><td>Confirm cannulation (assessment)</td></tr>
             <tr><td><kbd>K</kbd></td><td>Tourniquet on/off</td></tr>
           </table>
@@ -501,6 +508,7 @@ export class Panels {
         <tr><td>${tr('Punciones arteriales', 'Arterial punctures')}</td><td>${s.arterialPunctures}</td><td>${tr('Contactos nerviosos', 'Nerve contacts')}</td><td>${s.nerveContacts}</td></tr>
         <tr><td>${tr('Lavados con suero', 'Saline flushes')}</td><td>${s.flushes}</td><td>${tr('Infiltraciones', 'Infiltrations')}</td><td>${s.infiltrations}</td></tr>
         <tr><td>${tr('Movimiento de sonda al avanzar', 'Probe movement while advancing')}</td><td>${s.probeMoveDuringAdvance.toFixed(0)} mm</td><td>${tr('Colapso máx. del vaso', 'Max. vessel collapse')}</td><td>${Math.round(s.maxCollapse * 100)} %</td></tr>
+        ${s.catheterPct === null ? '' : `<tr><td>${tr('Catéter dentro de la vena', 'Catheter inside the vein')}</td><td>${s.catheterInVein.toFixed(0)} mm</td><td>${tr('Porcentaje del catéter', 'Share of the catheter')}</td><td>${s.catheterPct} %</td></tr>`}
       </table>`}
       ${s.checks.length ? `<h4>${tr('Criterios', 'Criteria')}</h4><ul>${s.checks.map((c) => `<li>${c.ok === null ? 'ℹ' : c.ok ? '✔' : '✖'} ${c.label} — ${c.detail}</li>`).join('')}</ul>` : ''}
       <h4>${tr('Historial (este navegador)', 'History (this browser)')}</h4>
@@ -554,7 +562,7 @@ const WELCOME_TOUCH = tr(`
     <li><b>Toca el brazo</b> en 3D para llevar la sonda a ese punto. Con <b>dos dedos</b> giras y acercas la cámara.</li>
     <li><b>Transv.</b> y <b>Long.</b> orientan la sonda respecto al vaso; <b>Centrar</b> la lleva sobre él.</li>
     <li>En <b>Punción</b>, coloca la aguja con <b>Fuera de plano</b> o <b>En plano</b>, avanza con la rueda y pulsa <b>Confirmar</b>.</li>
-    <li>En <b>Lecciones</b> tienes 8 lecciones guiadas que se corrigen solas.</li>
+    <li>En <b>Lecciones</b> tienes 9 lecciones guiadas que se corrigen solas, incluida la vía periférica ecoguiada.</li>
   </ol>
   <p class="muted">Añade la página a la pantalla de inicio para usarla a pantalla completa. Herramienta educativa: no sustituye la formación práctica supervisada.</p>
   <div class="crow" style="margin-top:12px"><button class="primary" id="wlStart">Empezar</button><button id="wlLesson">Ir a la lección 1</button></div>`, `
@@ -570,7 +578,7 @@ const WELCOME_TOUCH = tr(`
     <li><b>Tap the arm</b> in 3D to move the probe to that point. Use <b>two fingers</b> to rotate and zoom the camera.</li>
     <li><b>Short</b> and <b>Long</b> orient the probe to the vessel; <b>Center</b> brings it over the vessel.</li>
     <li>In <b>Cannulate</b>, place the needle with <b>Out-of-plane</b> or <b>In-plane</b>, advance with the wheel and tap <b>Confirm</b>.</li>
-    <li>In <b>Lessons</b> you will find 8 guided lessons that are checked automatically.</li>
+    <li>In <b>Lessons</b> you will find 9 guided lessons that are checked automatically, including the ultrasound-guided peripheral IV.</li>
   </ol>
   <p class="muted">Add the page to your home screen to use it full screen. Educational tool: it does not replace supervised hands-on training.</p>
   <div class="crow" style="margin-top:12px"><button class="primary" id="wlStart">Start</button><button id="wlLesson">Go to lesson 1</button></div>`);
@@ -593,6 +601,7 @@ const HELP_TOUCH = tr(`
     <tr><td>Presión</td><td>Comprime el tejido: las venas se colapsan y las arterias no</td></tr>
     <tr><td>Prof. · Ganancia · Foco</td><td>Ajustes de la imagen</td></tr>
     <tr><td>Avance · Ángulo · Rumbo</td><td>Aguja (modo Punción)</td></tr>
+    <tr><td>Catéter</td><td>Vía periférica: desliza el catéter sobre la aguja; después, <b>Retirar</b> saca la aguja y deja el catéter</td></tr>
   </table>
   <h4>Vistas</h4>
   <p><b>⇄</b> intercambia el monitor y el 3D, <b>Vista</b> cambia la cámara y <b>–</b> oculta el 3D. En horizontal, el monitor queda en el centro y el 3D a la derecha.</p>
@@ -616,6 +625,7 @@ const HELP_TOUCH = tr(`
     <tr><td>Pressure</td><td>Compresses the tissue: veins collapse, arteries do not</td></tr>
     <tr><td>Depth · Gain · Focus</td><td>Image settings</td></tr>
     <tr><td>Advance · Angle · Heading</td><td>Needle (Cannulation mode)</td></tr>
+    <tr><td>Catheter</td><td>Peripheral IV: slides the catheter over the needle; then <b>Remove</b> takes the needle out and leaves the catheter</td></tr>
   </table>
   <h4>Views</h4>
   <p><b>⇄</b> swaps the monitor and the 3D view, <b>View</b> changes the camera and <b>–</b> hides the 3D view. In landscape, the monitor sits in the center and the 3D view on the right.</p>

@@ -9,6 +9,8 @@
  *  - Blaivas & Adhikari 2009: perforación de pared posterior en eje corto.
  *  - Guías de acceso vascular (KDOQI 2019, GEMAV 2017): distancia a la anastomosis, separación entre
  *    agujas, dirección de la aguja venosa, zonas a evitar.
+ *  - Vía periférica ecoguiada: longitud de catéter dentro de la vena (Pandurangadu 2018, Bahl 2020) y
+ *    pasos del procedimiento (Manual MSD). Ver docs/FUNDAMENTOS.md §13.
  */
 import type { NeedleEvent } from '../interaction/needle';
 import { tr } from '../i18n';
@@ -37,8 +39,97 @@ export interface MetricsSnapshot {
   probeMoveDuringAdvance: number;
   maxCollapse: number;
   timeToFlash: number | null;
+  /** vía periférica: mm de catéter dentro de la vena y % de la longitud del catéter (null sin catéter) */
+  catheterInVein: number;
+  catheterPct: number | null;
   score: number;
   checks: FinalCheck[];
+}
+
+/**
+ * Fracción mínima del catéter que debe quedar dentro de la vena: con ≥ 65 % no falló ninguno en 72 h;
+ * con < 30 % fallaron todos (Pandurangadu 2018).
+ */
+export const CATHETER_MIN_PCT = 65;
+
+/** Porcentaje (entero) de la longitud del catéter que está dentro de la vena; null si no hay catéter. */
+export function catheterPct(inVeinMm: number, lengthMm: number): number | null {
+  if (!(lengthMm > 0)) return null;
+  return Math.round((100 * Math.max(0, Math.min(inVeinMm, lengthMm))) / lengthMm);
+}
+
+/** Estado final de una vía periférica para evaluarla. */
+export interface PivOutcome {
+  /** la aguja se ha retirado y queda el catéter */
+  needleOut: boolean;
+  /** vaso en cuya luz está el catéter (null: fuera de un vaso) */
+  vessel: { name: string; kind: string } | null;
+  /** mm de catéter dentro de la luz y longitud del catéter */
+  inVeinMm: number;
+  lengthMm: number;
+  transfixed: boolean;
+  arteryHit: boolean;
+  nerveHit: boolean;
+  asepsis: boolean;
+  /** compresor aún puesto al evaluar */
+  tourniquet: boolean;
+  /** lavado correcto con este catéter ya colocado */
+  flushed: boolean;
+  infiltrations: number;
+}
+
+/**
+ * Criterios de evaluación de la vía periférica ecoguiada. Los de la fístula (anastomosis, separación
+ * entre agujas, dirección arterial/venosa) no se aplican.
+ */
+export function pivChecks(o: PivOutcome): FinalCheck[] {
+  const OK = tr('Correcto', 'OK');
+  const YES = tr('Sí', 'Yes');
+  const inVein = o.needleOut && o.vessel?.kind === 'vein';
+  const pct = catheterPct(o.inVeinMm, o.lengthMm);
+  const where = !o.needleOut
+    ? tr('La aguja sigue dentro del catéter', 'The needle is still inside the catheter')
+    : !o.vessel
+      ? tr('El catéter no está en la luz de una vena', 'The catheter is not in a vein lumen')
+      : o.vessel.kind === 'vein'
+        ? tr(`En ${o.vessel.name}`, `In ${o.vessel.name}`)
+        : tr(`En ${o.vessel.name}: no es una vena`, `In ${o.vessel.name}: not a vein`);
+  return [
+    { label: tr('Catéter en la luz de una vena, con la aguja retirada', 'Catheter in a vein lumen, needle removed'), ok: inVein, detail: where, penalty: 35 },
+    {
+      // se decide sobre el porcentaje redondeado que se muestra
+      label: tr(`Catéter dentro de la vena ≥ ${CATHETER_MIN_PCT} % de su longitud (Pandurangadu 2018)`, `≥ ${CATHETER_MIN_PCT}% of the catheter inside the vein (Pandurangadu 2018)`),
+      ok: inVein && pct !== null ? pct >= CATHETER_MIN_PCT : null,
+      detail: inVein && pct !== null ? tr(`${o.inVeinMm.toFixed(0)} de ${o.lengthMm} mm (${pct} %)`, `${o.inVeinMm.toFixed(0)} of ${o.lengthMm} mm (${pct}%)`) : '—',
+      penalty: 10,
+    },
+    {
+      label: tr('Sin punción arterial ni contacto con un nervio', 'No arterial puncture or nerve contact'),
+      ok: !o.arteryHit && !o.nerveHit,
+      detail: [o.arteryHit ? tr('arteria', 'artery') : '', o.nerveHit ? tr('nervio', 'nerve') : ''].filter(Boolean).join(', ') || OK,
+      penalty: 0,
+    },
+    { label: tr('Sin atravesar la pared posterior de la vena', 'Back wall of the vein not perforated'), ok: !o.transfixed, detail: o.transfixed ? tr('Transfixión', 'Transfixion') : OK, penalty: 0 },
+    { label: tr('Técnica aséptica (piel desinfectada, funda y gel estériles)', 'Aseptic technique (skin disinfected, sterile cover and gel)'), ok: o.asepsis, detail: o.asepsis ? YES : 'No', penalty: 5 },
+    {
+      label: tr('Compresor retirado al terminar', 'Tourniquet released at the end'),
+      ok: !o.tourniquet,
+      detail: o.tourniquet ? tr('Sigue aplicado', 'Still applied') : YES,
+      penalty: 3,
+    },
+    {
+      label: tr('Lavado con suero sin extravasación (Manual MSD)', 'Saline flush with no extravasation (MSD Manual)'),
+      ok: o.flushed,
+      detail: o.flushed
+        ? o.infiltrations
+          ? tr('Sí, tras una extravasación previa', 'Yes, after an earlier extravasation')
+          : YES
+        : o.infiltrations
+          ? tr('Extravasación: retirar el catéter y canalizar en otro punto', 'Extravasation: remove the catheter and cannulate at another site')
+          : tr('Sin comprobar', 'Not checked'),
+      penalty: 5,
+    },
+  ];
 }
 
 export class Metrics {
@@ -64,6 +155,9 @@ export class Metrics {
   maxCollapse = 0;
   firstSkin = -1;
   firstFlash = -1;
+  /** vía periférica: mm de catéter dentro de la vena y longitud del catéter (0 = sin catéter) */
+  catheterInVein = 0;
+  catheterLength = 0;
   checks: FinalCheck[] = [];
   log: NeedleEvent[] = [];
 
@@ -184,6 +278,8 @@ export class Metrics {
       probeMoveDuringAdvance: this.probeMoveDuringAdvance,
       maxCollapse: this.maxCollapse,
       timeToFlash: this.firstSkin >= 0 && this.firstFlash >= 0 ? this.firstFlash - this.firstSkin : null,
+      catheterInVein: this.catheterInVein,
+      catheterPct: catheterPct(this.catheterInVein, this.catheterLength),
       score: this.score(),
       checks: this.checks,
     };

@@ -3,6 +3,7 @@
  */
 import type { App } from '../app/App';
 import { tr } from '../i18n';
+import { CATHETER_LENGTHS } from '../scene/instruments';
 import { placeDefaults } from '../scene/SceneManager';
 import { SKIN_TONES } from '../scene/room';
 import type { MachineSettings } from '../sim/UltrasoundSim';
@@ -203,6 +204,7 @@ export function buildConsole(app: App, root: HTMLElement): () => void {
   // ---------------- Aguja ----------------
   const gNd = group(tr('Aguja de punción', 'Cannulation needle'));
   gNd.root.dataset.grp = 'needle';
+  const ndTitle = gNd.root.querySelector('h5 span') as HTMLElement;
   const nCol = el('div', { class: 'ccol' });
   nCol.style.cssText = 'display:flex;flex-direction:column;gap:4px';
   const nr = el('div', { class: 'crow' });
@@ -232,8 +234,30 @@ export function buildConsole(app: App, root: HTMLElement): () => void {
     ),
   ).el.classList.add('adv');
   nCol.appendChild(nr2);
+  // vía periférica: calibre y longitud del catéter sobre aguja (en lugar de las agujas arterial y venosa)
+  const nrPiv = el('div', { class: 'crow' });
+  add(
+    nrPiv,
+    selectBox(
+      [['22', '22G'], ['20', '20G'], ['18', '18G']],
+      () => String(app.needle.gauge) as '20',
+      (v) => app.setCatheter(parseInt(v), app.needle.cath?.length ?? CATHETER_LENGTHS[0]),
+      tr('Calibre del catéter (22G azul, 20G rosa, 18G verde)', 'Catheter gauge (22G blue, 20G pink, 18G green)'),
+    ),
+  );
+  add(
+    nrPiv,
+    selectBox(
+      CATHETER_LENGTHS.map((l) => [String(l), `${l} mm`] as [string, string]),
+      () => String(app.needle.cath?.length ?? CATHETER_LENGTHS[0]),
+      (v) => app.setCatheter(app.needle.gauge, parseInt(v)),
+      tr('Longitud del catéter: cuanto más profunda es la vena, más largo debe ser para que quede suficiente dentro', 'Catheter length: the deeper the vein, the longer it must be so that enough of it stays inside'),
+    ),
+  );
+  nCol.appendChild(nrPiv);
   add(nCol, button(tr('Asepsia', 'Asepsis'), () => app.setAsepsis(!app.asepsis), { title: tr('Preparación aséptica antes de puncionar: piel desinfectada, funda estéril en la sonda y gel estéril', 'Aseptic preparation before cannulation: disinfected skin, sterile probe cover and sterile gel'), active: () => app.asepsis }));
-  nCol.appendChild(el('div', { class: 'mini' }, tr('Colocar la aguja · abordaje', 'Place the needle · approach')));
+  const placeLbl = el('div', { class: 'mini' }, tr('Colocar la aguja · abordaje', 'Place the needle · approach'));
+  nCol.appendChild(placeLbl);
   add(nCol, button(tr('Longitudinal · en plano', 'Long axis · in-plane'), () => app.placeNeedleAuto('ip'), { title: tr('Abordaje longitudinal (en plano), el preferido: la aguja entra por el extremo de la sonda y se ve entera (N con la sonda en longitudinal)', 'Long-axis (in-plane) approach, the preferred one: the needle enters at the end of the probe and is seen along its whole length (N with the probe in long axis)') }));
   add(nCol, button(tr('Transversal · fuera de plano', 'Short axis · out-of-plane'), () => app.placeNeedleAuto('oop'), { title: tr('Abordaje transversal (fuera de plano): la aguja entra en la línea media de la sonda; no se ve la entrada en la pared, hay que seguir la punta (N con la sonda en transversal)', 'Short-axis (out-of-plane) approach: the needle enters at the probe midline; wall entry is not seen, so you must track the tip (N with the probe in short axis)') }));
   add(nCol, button(tr('Clic en la piel…', 'Click on skin…'), () => {
@@ -243,18 +267,27 @@ export function buildConsole(app: App, root: HTMLElement): () => void {
   gNd.body.appendChild(nCol);
   const nCol2 = el('div', { class: 'ccol' });
   nCol2.style.cssText = 'display:flex;flex-direction:column;gap:4px';
-  add(nCol2, field(tr('Ángulo', 'Angle'), () => app.needle.angle, (v) => (app.needle.angle = v), { min: 5, max: 70, step: 1, fmt: (v) => `${v.toFixed(0)}°`, title: tr('Ángulo de inserción respecto a la piel (FAV 20–35°, prótesis ≈45°)', 'Insertion angle to the skin (AVF 20–35°, graft ≈45°)') }));
+  add(nCol2, field(tr('Ángulo', 'Angle'), () => app.needle.angle, (v) => (app.needle.angle = v), { min: 5, max: 70, step: 1, fmt: (v) => `${v.toFixed(0)}°`, title: tr('Ángulo de inserción respecto a la piel (FAV 20–35°, prótesis ≈45°, vía periférica en vena profunda ≈45°)', 'Insertion angle to the skin (AVF 20–35°, graft ≈45°, peripheral IV in a deep vein ≈45°)') }));
   add(nCol2, field(tr('Rumbo', 'Heading'), () => app.needle.heading, (v) => (app.needle.heading = v), { min: -180, max: 180, step: 1, fmt: (v) => `${v.toFixed(0)}°`, title: tr('Dirección de la aguja sobre la piel', 'Needle direction over the skin') })).el.classList.add('adv');
-  add(nCol2, field(tr('Insertada', 'Inserted'), () => Math.max(0, app.needle.depth), (v) => {
-    if (app.needle.placed && !app.needle.confirmed) app.needle.depth = v;
+  const insF = add(nCol2, field(tr('Insertada', 'Inserted'), () => Math.max(0, app.needle.depth), (v) => {
+    if (app.needle.placed && !app.needle.confirmed) app.needle.depth = Math.min(v, app.needle.maxDepth);
   }, { min: 0, max: 30, step: 0.1, fmt: (v) => `${v.toFixed(1)} mm` }));
+  // el catéter sobre aguja es más largo que las agujas de fístula
+  const insInput = insF.el.querySelector('input') as HTMLInputElement;
+  const insUpd = insF.update;
+  insF.update = () => {
+    insInput.max = String(app.needle.cath ? Math.ceil(app.needle.maxDepth) : 30);
+    insUpd();
+  };
   const adv = el('div', { class: 'crow' });
   adv.appendChild(hold(tr('▲ Avanzar', '▲ Advance'), 'arrowup', tr('Avanzar la aguja (↑)', 'Advance the needle (↑)')));
   adv.appendChild(hold(tr('▼ Retirar', '▼ Withdraw'), 'arrowdown', tr('Retirar la aguja (↓)', 'Withdraw the needle (↓)')));
+  const cathBtn = hold(tr('▲ Catéter', '▲ Catheter'), 'u', tr('Deslizar el catéter sobre la aguja, que se mantiene quieta (U)', 'Slide the catheter over the needle, which is held still (U)'));
+  adv.appendChild(cathBtn);
   add(adv, button('⇄', () => {
     const n = app.needle;
     // invertir el rumbo sólo con la aguja fuera de la piel: dentro del tejido sería un barrido de 180°
-    if (n.placed && n.depth > 0) {
+    if (n.inserted) {
       app.toast(tr('Retira la aguja de la piel para invertir su dirección', 'Withdraw the needle from the skin to reverse its direction'), 'warn');
       return;
     }
@@ -262,9 +295,9 @@ export function buildConsole(app: App, root: HTMLElement): () => void {
   }, { title: tr('Invertir la dirección (anterógrada/retrógrada), con la aguja fuera de la piel', 'Reverse the direction (antegrade/retrograde), with the needle out of the skin') })).el.classList.add('adv');
   nCol2.appendChild(adv);
   const cf = el('div', { class: 'crow' });
-  add(cf, button(tr('Confirmar punción', 'Confirm cannulation'), () => app.confirmPuncture(), { cls: 'primary', title: tr('Evaluar la posición final (Intro)', 'Assess the final position (Enter)') }));
+  const cfB = add(cf, button(tr('Confirmar punción', 'Confirm cannulation'), () => app.confirmPuncture(), { cls: 'primary', title: tr('Evaluar la posición final (Intro)', 'Assess the final position (Enter)') }));
   add(cf, button(tr('Suero', 'Saline'), () => app.flushNeedle(), { title: tr('Lavar con 10 mL de suero para comprobar la posición de la punta (J): en la luz se ven microburbujas arrastradas por el flujo; fuera, infiltración', 'Flush with 10 mL of saline to check the tip position (J): in the lumen, microbubbles are swept along by the flow; outside it, infiltration') }));
-  add(cf, button(tr('Retirar aguja', 'Remove needle'), () => app.withdrawNeedle(), { cls: 'danger' }));
+  const rmB = add(cf, button(tr('Retirar aguja', 'Remove needle'), () => app.withdrawNeedle(), { cls: 'danger' }));
   add(cf, button(tr('Realce', 'Enhance'), () => (s().needleEnhance = !s().needleEnhance), { active: () => s().needleEnhance, title: tr('Realce de aguja (angulación del haz hacia la aguja)', 'Needle enhancement (beam steered toward the needle)') })).el.classList.add('adv');
   nCol2.appendChild(cf);
   gNd.body.appendChild(nCol2);
@@ -353,6 +386,17 @@ export function buildConsole(app: App, root: HTMLElement): () => void {
   const update = () => {
     const m = app.mode;
     gNd.root.classList.toggle('hidden', !app.needleMode());
+    // vía periférica: un catéter sobre aguja en lugar de las agujas arterial y venosa
+    const piv = app.isPiv();
+    ndTitle.textContent = piv ? tr('Catéter sobre aguja', 'Over-the-needle catheter') : tr('Aguja de punción', 'Cannulation needle');
+    placeLbl.textContent = piv ? tr('Colocar el catéter · abordaje', 'Place the catheter · approach') : tr('Colocar la aguja · abordaje', 'Place the needle · approach');
+    nr.classList.toggle('hidden', piv);
+    nr2.classList.toggle('hidden', piv);
+    nrPiv.classList.toggle('hidden', !piv);
+    cathBtn.classList.toggle('hidden', !piv);
+    cfB.el.textContent = piv ? tr('Confirmar vía', 'Confirm line') : tr('Confirmar punción', 'Confirm cannulation');
+    rmB.el.textContent = app.needle.needleOut ? tr('Retirar catéter', 'Remove catheter') : tr('Retirar aguja', 'Remove needle');
+    rmB.el.title = piv ? tr('Con el catéter deslizado, saca la aguja y deja el catéter; después, retira el catéter', 'With the catheter threaded, takes the needle out and leaves the catheter; after that, removes the catheter') : '';
     gRoom.root.classList.toggle('hidden', m !== 'room');
     gDop.root.classList.toggle('hidden', m === 'room');
     gImg.root.classList.toggle('hidden', m === 'room');

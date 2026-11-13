@@ -128,12 +128,18 @@ export interface ProbePose {
   width: number;
 }
 
+/** Cilindro recto que el simulador dibuja como aguja: hasta `MAX_NEEDLES` (agujas y tramos de catéter). */
 export interface NeedleRender {
   back: Vector3;
   tip: Vector3;
   radius: number;
   active: boolean;
+  /** tramo de catéter de plástico sin la aguja dentro */
+  plastic?: boolean;
 }
+
+/** Igual que el tamaño de `uNdA` y `uNdB` en el shader. */
+export const MAX_NEEDLES = 4;
 
 /** Lavado con suero en curso, en coordenadas de tejido (ver sim/flush.ts). */
 export interface FlushRender {
@@ -301,8 +307,8 @@ export class UltrasoundSim {
       uElevFocus: { value: 20 },
       uElevFWHM: { value: 1.1 },
       uDopDir: { value: new Vector3(0, -1, 0) },
-      uNdA: { value: [new Vector4(), new Vector4()] },
-      uNdB: { value: [new Vector4(), new Vector4()] },
+      uNdA: { value: Array.from({ length: MAX_NEEDLES }, () => new Vector4()) },
+      uNdB: { value: Array.from({ length: MAX_NEEDLES }, () => new Vector4()) },
       uTent: { value: new Vector4() },
       uTentDir: { value: new Vector4(0, 0, 0, -1) },
       uGelMax: { value: 2.0 },
@@ -556,13 +562,13 @@ export class UltrasoundSim {
     }
     const nA = u.uNdA.value as Vector4[];
     const nB = u.uNdB.value as Vector4[];
-    for (let i = 0; i < 2; i++) {
+    for (let i = 0; i < MAX_NEEDLES; i++) {
       const nd = this.needles[i];
       if (nd && nd.active) {
         const a = this.tissueToImage(nd.back, tmp3).p;
         nA[i].set(a.x, a.y, a.z, nd.radius);
         const b = this.tissueToImage(nd.tip, tmp3).p;
-        nB[i].set(b.x, b.y, b.z, 1);
+        nB[i].set(b.x, b.y, b.z, nd.plastic ? 2 : 1);
       } else {
         nB[i].w = 0;
       }

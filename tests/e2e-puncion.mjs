@@ -1,5 +1,5 @@
 // Punción completa manejando la interfaz como un usuario (clics y teclado), con capturas.
-//   node tests/e2e-puncion.mjs <url> [carpeta_capturas] [corto|largo|corto-dntp]
+//   node tests/e2e-puncion.mjs <url> [carpeta_capturas] [corto|largo|largo-venosa|corto-dntp|via|via-movil]
 //   corto: eje corto con la tecla N desde el modo Exploración (avance sin seguir la punta).
 //   largo: abordaje longitudinal con buena técnica: compresor (K), vista longitudinal (2), asepsia,
 //          «Longitudinal · en plano»,
@@ -10,6 +10,14 @@
 //   corto-dntp: eje corto con buena técnica: compresor, N, posicionamiento dinámico de la punta
 //          (↑ hasta ver la punta, Mayús+W hasta perderla, y repetir), aplanar (AvPág) y avanzar,
 //          lavado con suero (J) sobre la punta, aguas abajo y con Doppler color (C), Intro.
+//   via:   vía periférica ecoguiada en el caso «piv_dificil» (lo carga la propia prueba): la vena se
+//          colapsa al presionar (X), compresor (K), medidas, vista longitudinal (2), asepsia, catéter
+//          sobre aguja en plano, ↑ hasta el reflujo, Mayús+↑ hasta que entra la punta del catéter,
+//          U para deslizarlo hasta el cono, «Retirar aguja», soltar el compresor (K), suero (J), Intro.
+//   via-movil: lo mismo en la interfaz táctil (?movil=1, pantalla de móvil), con sus botones y la
+//          rueda de ajuste (Presión, Avance y Catéter).
+// Sin Playwright completo vale playwright-core con un navegador instalado: PW_CHANNEL=msedge (o chrome).
+// PW_GPU=1 usa la GPU del equipo en lugar de SwiftShader.
 // Solo se lee el estado de la aplicación (window.app) para saber cuándo parar; las acciones son
 // clics y teclas reales. El bucle de render se pausa durante cada captura (SwiftShader es lento).
 // Cada captura guarda la pantalla completa y la imagen ecográfica nativa (<nombre>-eco.png).
@@ -17,12 +25,21 @@ import { createRequire } from 'module';
 import { mkdirSync, writeFileSync } from 'fs';
 const require = createRequire(import.meta.url);
 let pw;
-try { pw = require('playwright'); } catch { pw = require('/opt/node22/lib/node_modules/playwright'); }
+try { pw = require('playwright'); } catch { try { pw = require('playwright-core'); } catch { pw = require('/opt/node22/lib/node_modules/playwright'); } }
 
 const [url, out = 'tests/screens/e2e', eje = 'corto'] = process.argv.slice(2);
 mkdirSync(out, { recursive: true });
-const browser = await pw.chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
-const page = await browser.newPage({ viewport: { width: 1400, height: 860 } });
+/** vía periférica: catéter sobre aguja en el caso piv_dificil, en escritorio o en la interfaz táctil */
+const via = eje.startsWith('via');
+const movil = eje === 'via-movil';
+const target = new URL(url);
+if (via) target.searchParams.set('caso', 'piv_dificil');
+if (movil) target.searchParams.set('movil', '1');
+const browser = await pw.chromium.launch({
+  channel: process.env.PW_CHANNEL || undefined,
+  args: process.env.PW_GPU === '1' ? ['--ignore-gpu-blocklist'] : ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'],
+});
+const page = await browser.newPage({ viewport: movil ? { width: 390, height: 844 } : { width: 1400, height: 860 } });
 const errors = [];
 page.on('pageerror', (e) => errors.push(e.message));
 
@@ -39,6 +56,7 @@ const state = () => page.evaluate(() => {
     vaso: n.inVessel?.def.id ?? null,
     luz_mm: inLumen ? +n.intraluminalLength(a.model).toFixed(1) : 0,
     centrado: cen === null ? null : +cen.toFixed(2),
+    ...(n.cath ? { cateter: n.cath.stage, deslizado: +n.cath.slid.toFixed(1), en_vena_mm: +n.catheterInVein(a.model).toFixed(1) } : {}),
   };
 });
 const log = async (paso) => console.log(paso.padEnd(34), JSON.stringify(await state()));
@@ -114,6 +132,12 @@ const tipInfo = () => page.evaluate(() => {
     cen: inLumen ? n.centering(a.model) : null,
     probeX: a.probe.x,
     frame: a.frameCount,
+    // vía periférica
+    press: a.probe.press,
+    colapso: a.caseDef.access ? a.collapseOf(a.caseDef.access.veinId) : 0,
+    cathIn: !!n.cath && n.catheterTipInLumen(a.model),
+    cathFull: !!n.cath?.full,
+    cathStage: n.cath?.stage ?? null,
   };
 });
 /** Mantiene pulsadas unas teclas fotograma a fotograma hasta que se cumple la condición. */
@@ -135,12 +159,15 @@ const centerOnTip = async () => {
   else if (t.eDir < -0.4 * t.half) t = await holdFrames(['Shift', 's'], (x) => x.eDir >= -0.2 * x.half, 60);
   return t;
 };
-/** Mide con el calibre (M) la profundidad y el diámetro de la FAV, con la sonda en transversal. */
-const measureVein = async () => {
-  await page.keyboard.press('m');
+/**
+ * Mide con el calibre la profundidad y el diámetro del vaso de acceso, con la sonda en transversal.
+ * El calibre se activa con la tecla M o, en la interfaz táctil, con el botón «Medir».
+ */
+const measureVein = async (toggle = () => page.keyboard.press('m')) => {
+  await toggle();
   const pts = await page.evaluate(() => {
     const a = window.app;
-    const v = a.vesselInImage('fav');
+    const v = a.vesselInImage(a.caseDef.access?.veinId ?? 'fav');
     if (!v) return null;
     const r = document.getElementById('usView').getBoundingClientRect();
     const at = (u, w) => {
@@ -150,23 +177,163 @@ const measureVein = async () => {
     const top = v.w - v.r;
     return [at(v.u, 0.3), at(v.u, top), at(v.u, top), at(v.u, v.w + v.r)];
   });
-  if (!pts) throw new Error('La FAV no está en la imagen para medirla');
+  if (!pts) throw new Error('El vaso de acceso no está en la imagen para medirlo');
   for (const [x, y] of pts) {
     await page.mouse.click(x, y);
     await page.waitForTimeout(200);
   }
-  await page.keyboard.press('m');
+  await toggle();
   return page.evaluate(() => window.app.monitor.calipers.filter((c) => c.b).map((c) => c.label));
 };
 const waitFlush = (tau) => page.waitForFunction((tau) => { const a = window.app; return (a.flush && a.time - a.flush.t0 >= tau) || a.metrics.infiltrations > 0; }, tau, { timeout: 240000, polling: 50 });
 
-await page.goto(url);
+// basta con el documento: la espera real es a que la aplicación dibuje sus primeros fotogramas
+await page.goto(target.href, { waitUntil: 'domcontentloaded', timeout: 120000 });
 await page.waitForFunction(() => window.app && window.app.frameCount > 2, null, { timeout: 180000 });
 // 1. cerrar la bienvenida con su botón
 if (await page.isVisible('#modalClose')) await page.click('#modalClose');
 await log('1. bienvenida cerrada');
 let s;
-if (eje === 'corto-dntp') {
+if (via) {
+  // Botones de cada interfaz. En la táctil: barra de navegación, botones del panel inferior y rueda de
+  // ajuste (se elige el ajuste en su ficha y se mantiene pulsado + o −).
+  const btn = (name) => page.getByRole('button', { name, exact: true }).click();
+  const chip = (id) => page.click(`.m-chip[data-id="${id}"]`);
+  /** Mantiene pulsado un botón (− o + de la rueda) fotograma a fotograma hasta que se cumple la condición. */
+  const holdButton = async (selector, done, maxFrames = 400) => {
+    const box = await page.locator(selector).boundingBox();
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await page.mouse.down();
+    let t = await tipInfo();
+    for (let n = 0; n < maxFrames && !done(t); n++) {
+      const f = t.frame;
+      await page.waitForFunction((f) => window.app.frameCount > f, f, { timeout: 120000, polling: 40 });
+      t = await tipInfo();
+    }
+    await page.mouse.up();
+    return t;
+  };
+  const PLUS = '.m-jog button:last-child';
+  const MINUS = '.m-jog button:first-child';
+  /** Arrastra la rueda de ajuste `px` píxeles (avance fino: 0,04 mm por píxel). */
+  const dragJog = async (px) => {
+    const box = await page.locator('.m-jog-strip').boundingBox();
+    const x0 = box.x + box.width / 2 - px / 2;
+    const y = box.y + box.height / 2;
+    await page.mouse.move(x0, y);
+    await page.mouse.down();
+    await page.mouse.move(x0 + px, y, { steps: 4 });
+    await page.mouse.up();
+  };
+  // 2. localizar la vena en transversal y comprobar que se colapsa al presionar (la arteria no)
+  if (movil) {
+    await btn('Centrar');
+    await btn('Transv.');
+  } else {
+    await page.click('#modeTabs button[data-mode="cannulate"]');
+    await page.click('button[title^="Centrar sobre el vaso"]');
+    await page.keyboard.press('1');
+  }
+  await page.waitForTimeout(1500);
+  await shot('01-vena-en-transversal');
+  let t;
+  if (movil) {
+    await chip('presion');
+    t = await holdButton(PLUS, (x) => x.colapso > 0.7, 300);
+  } else t = await holdFrames(['x'], (x) => x.colapso > 0.7, 300);
+  if (t.colapso <= 0.6) throw new Error(`La vena no se colapsa al presionar (colapso ${t.colapso.toFixed(2)})`);
+  await log('2. la vena se colapsa al presionar');
+  await shot('02-vena-colapsada');
+  if (movil) t = await holdButton(MINUS, (x) => x.press <= 0.8, 300);
+  else t = await holdFrames(['z'], (x) => x.press <= 0.8, 300);
+  // 3. compresor y medidas (profundidad y diámetro) con el calibre
+  if (movil) await btn('Compresor');
+  else await page.keyboard.press('k');
+  await page.waitForTimeout(800);
+  console.log('   medidas (profundidad, diámetro):', (await measureVein(movil ? () => btn('Medir') : undefined)).join(', '));
+  await shot('03-compresor-y-medidas');
+  // 4. vista longitudinal, asepsia y catéter sobre aguja en plano
+  if (movil) {
+    await page.click('#mNav button[data-nav="cannulate"]');
+    await btn('Long.');
+    await btn('Asepsia');
+    await btn('En plano');
+  } else {
+    await page.keyboard.press('2');
+    await page.waitForTimeout(800);
+    await page.getByRole('button', { name: 'Asepsia', exact: true }).click();
+    await page.getByRole('button', { name: 'Longitudinal · en plano' }).click();
+  }
+  await page.waitForFunction(() => window.app.needle.placed, null, { timeout: 60000 });
+  await log('4. compresor, asepsia y catéter en plano');
+  await shot('04-cateter-sobre-la-piel');
+  // 5. avanzar viendo la aguja hasta la pared (signo de la tienda) y la luz (reflujo)
+  const advance = async (done, maxFrames) => {
+    if (!movil) return holdFrames(['ArrowUp'], done, maxFrames);
+    await chip('avance');
+    return holdButton(PLUS, done, maxFrames);
+  };
+  t = await advance((x) => WALL.includes(x.estado), 400);
+  if (t.estado === 'tienda') {
+    await shot('05-signo-tienda');
+    t = await advance((x) => PAST.includes(x.estado), 80);
+  }
+  if (t.estado !== 'luz') throw new Error(`La punta no quedó en la luz (estado ${t.estado}, ${t.depth.toFixed(1)} mm)`);
+  await page.waitForTimeout(2500); // reflujo en la cámara de la aguja
+  await log('5. ↑ hasta el reflujo');
+  await shot('06-reflujo');
+  // con el reflujo, la punta del catéter aún no ha entrado: si se intenta deslizar, no progresa
+  if (movil) {
+    await chip('cateter');
+    await dragJog(40);
+  } else await holdFrames(['u'], () => false, 3);
+  t = await tipInfo();
+  if (t.cathStage !== 'montado') throw new Error('El catéter se deslizó sin tener la punta en la vena');
+  // 6. avanzar 1–2 mm más, en pasos finos, hasta que la punta del catéter esté dentro de la vena
+  for (let i = 0; i < 40 && !t.cathIn && t.estado === 'luz'; i++) {
+    if (movil) {
+      await chip('avance');
+      await dragJog(8);
+      t = await tipInfo();
+    } else t = await holdFrames(['Shift', 'ArrowUp'], (x) => x.cathIn || x.estado !== 'luz', 4);
+  }
+  // un poco más de margen, sin llegar a la pared posterior
+  if (movil) await dragJog(10);
+  else await holdFrames(['Shift', 'ArrowUp'], () => false, 6);
+  t = await tipInfo();
+  if (!t.cathIn || t.estado !== 'luz') throw new Error(`La punta del catéter no quedó en la vena (estado ${t.estado})`);
+  await log('6. 1–2 mm más: catéter en la vena');
+  await shot('07-punta-del-cateter-en-la-vena');
+  // 7. con la aguja quieta, deslizar el catéter hasta el cono
+  if (movil) {
+    await chip('cateter');
+    t = await holdButton(PLUS, (x) => x.cathFull, 600);
+  } else t = await holdFrames(['u'], (x) => x.cathFull, 600);
+  if (!t.cathFull) throw new Error('El catéter no llegó hasta el cono');
+  await log('7. catéter deslizado hasta el cono');
+  await shot('08-cateter-deslizado');
+  // 8. retirar la aguja: queda el catéter
+  if (movil) await btn('Retirar');
+  else await page.getByRole('button', { name: 'Retirar aguja', exact: true }).click();
+  await page.waitForFunction(() => window.app.needle.needleOut, null, { timeout: 60000 });
+  await log('8. aguja retirada');
+  await shot('09-aguja-retirada');
+  // 9. soltar el compresor y lavar con suero: sin extravasación
+  if (movil) {
+    await btn('Compresor');
+    await btn('Suero');
+  } else {
+    await page.keyboard.press('k');
+    await page.keyboard.press('j');
+  }
+  await waitFlush(1.2);
+  if (await page.evaluate(() => window.app.metrics.infiltrations > 0)) throw new Error('El lavado produjo una extravasación: el catéter no estaba en la vena');
+  await log('9. compresor suelto y lavado con suero');
+  await shot('10-lavado-con-suero');
+  await page.waitForFunction(() => !window.app.flush, null, { timeout: 240000, polling: 100 });
+  s = await state();
+  if (movil) await btn('Confirmar');
+} else if (eje === 'corto-dntp') {
   // 2. modo Punción (pestaña), sonda centrada (◎), compresor (K) y vista transversal (1)
   await page.click('#modeTabs button[data-mode="cannulate"]');
   await page.click('button[title^="Centrar sobre el vaso"]');
@@ -336,8 +503,8 @@ if (eje === 'corto-dntp') {
   await log('5. ↑ hasta la luz');
   await shot('03-reflujo');
 }
-// confirmar con Intro
-await page.keyboard.press('Enter');
+// confirmar con Intro (en la interfaz táctil ya se ha pulsado «Confirmar»)
+if (!movil) await page.keyboard.press('Enter');
 await page.waitForTimeout(2000);
 const result = await page.evaluate(() => ({
   puntuacion: window.app.metrics.score(),
@@ -348,12 +515,15 @@ const result = await page.evaluate(() => ({
   criterios: window.app.metrics.checks.map((c) => `${c.ok === null ? '·' : c.ok ? '✓' : '✗'} ${c.label}: ${c.detail}`),
 }));
 await log('Intro (evaluación)');
-await shot(eje === 'corto' ? '04-evaluacion' : '09-evaluacion');
+await shot(eje === 'corto' ? '04-evaluacion' : via ? '11-evaluacion' : '09-evaluacion');
 const vis = await page.evaluate(() => window.app.metrics.snapshot().tipVisiblePct);
-console.log(JSON.stringify({ ...result, punta_visible_pct: Math.round(vis) }, null, 1));
+const cateter_pct = await page.evaluate(() => window.app.metrics.snapshot().catheterPct);
+console.log(JSON.stringify({ ...result, punta_visible_pct: Math.round(vis), ...(via ? { cateter_en_vena_pct: cateter_pct } : {}) }, null, 1));
 console.log('errores de la página:', errors.length ? errors : 'ninguno');
 await browser.close();
-const flushOk = eje === 'corto' ? true : result.lavados === 2;
+const flushOk = eje === 'corto' ? true : result.lavados === (via ? 1 : 2);
+// vía periférica: todos los criterios cumplidos, con al menos el 65 % del catéter dentro de la vena
+const viaOk = !via || (cateter_pct >= 65 && result.criterios.every((c) => c.startsWith('✓')));
 // ninguna ruta cambia la trayectoria en el tejido: aplanar dentro de la luz no es una redirección
-const ok = s.estado === 'luz' && !errors.length && flushOk && result.infiltraciones === 0 && result.redirecciones === 0;
+const ok = s.estado === 'luz' && !errors.length && flushOk && viaOk && result.infiltraciones === 0 && result.redirecciones === 0;
 process.exit(ok ? 0 : 1);

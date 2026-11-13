@@ -350,6 +350,92 @@ La imagen se calcula en ocho pases de GPU, uno tras otro.
 - Envolvente automática; cálculo de VPS, VFD, IR, IP, TAMV y Q = TAMV·π(d/2)²·60.
 - Audio sintetizado a la frecuencia Doppler f_D = 2f₀v·cosθ/c, en estéreo según el sentido del flujo.
 
+## 13. Vía periférica ecoguiada (catéter sobre aguja)
+
+El caso «Vía periférica difícil» (`piv_dificil`) y la lección 9 usan el mismo brazo, la misma sonda y la misma física de aguja que la punción de la FAV. Cambian el dispositivo (un catéter venoso periférico sobre aguja), la lista de pasos y la evaluación. Los criterios de la fístula (distancia a la anastomosis, separación entre agujas, aguja arterial o venosa) no se aplican.
+
+### 13.1 Indicación y elección de la vena
+
+- **Indicación:** la Society of Hospital Medicine recomienda la ecografía en tiempo real para la vía periférica en adultos con acceso venoso difícil, porque reduce el tiempo del procedimiento, los intentos y las redirecciones de la aguja (recomendación 16) [78].
+- **Regla «3:1:3»:** buscar venas de al menos **3 mm de diámetro**, a **1 cm de profundidad (1,5 cm como máximo)** y rectas [79]. La fuente da la tercera cifra, la del tramo recto, como «3 mm», que parece una errata; el simulador no la usa.
+- **Diámetro:** en 180 punciones entre la fosa antecubital y la mitad del brazo, el éxito al primer intento fue del 63 % (78/124) en venas de ≥ 4 mm y del 39 % (22/56) en las de < 4 mm [84].
+- **Profundidad:**
+  - el éxito al primer intento fue del 58 % (96/165) entre 0,3 y 1,5 cm de profundidad y del 27 % (4/15) fuera de ese intervalo [84];
+  - con 151 catéteres de 20G y 48 mm, la probabilidad de que la vía siguiera funcionando a las 48 h fue de 1,00 en venas a menos de 0,4 cm, de 0,62 entre 0,4 y 1,19 cm y de 0,29 a 1,2 cm o más. El diámetro de la vena no influyó [83].
+- **Localización:** en el mismo estudio, la supervivencia fue de 0,83 en la fosa antecubital o el antebrazo y de 0,50 en la región braquial [83]. La vena del caso, por encima del codo, es por tanto una diana de recurso: cuando no hay otra, importa todavía más cuánto catéter queda dentro.
+- **Vena o arteria:** las venas tienen la pared fina, son ovaladas y se comprimen con la sonda con más facilidad que las arterias. Las dos venas humerales flanquean la arteria humeral. El segmento elegido debe ser recto, ancho, relativamente superficial y estar separado de la arteria [80]. En el brazo se usan sobre todo la basílica y las humerales profundas [79].
+- **Complicaciones:** fallo precoz de la vía, hematoma, punción arterial, lesión nerviosa e infección [79]; extravasación, punción arterial, hematoma y lesión nerviosa [80].
+- **Preservación de venas:** en la enfermedad renal crónica avanzada, las venas del antebrazo y del brazo se reservan para una futura fístula, y el brazo de una fístula no se usa para vías ni extracciones: GEMAV recomienda preservar la red venosa y usar el dorso de la mano [3], y WikEM cuenta la fístula entre las contraindicaciones [79]. Por eso el paciente del caso **no tiene enfermedad renal**. La vena basílica por encima del codo, la diana del caso, es además la que se usa en la FAV humerobasílica.
+
+**Valores del caso** (didácticos, fijados para quedar en el límite de la regla «3:1:3»):
+
+| Parámetro | Valor en el simulador |
+|---|---|
+| Vena basílica, entre 29,5 y 37,5 cm de la muñeca | 2,6 mm de diámetro; ≈ 3,1 mm con compresor (el modelo distiende las venas un 18 %) |
+| Profundidad de la pared anterior | ≈ 10,5 mm (centro de la vena a ≈ 12 mm) |
+| Grasa subcutánea | ≈ 14 mm (9 mm más que el brazo de referencia) |
+| Venas cefálica y medianas | < 2 mm (no sirven para la vía) |
+| Arteria humeral y nervio mediano | ≈ 12–13 mm más profundos que la vena, bajo la fascia, y a 3–16 mm de su vertical |
+
+### 13.2 Longitud de catéter dentro de la vena
+
+- **Pandurangadu 2018** [81]. Estudio prospectivo con 86 vías ecoguiadas, seguidas 72 h. Fallaron **todas** las que tenían menos del 30 % del catéter dentro de la vena, el 32,4 % de las que tenían entre el 30 y el 64 % y **ninguna** de las que tenían el 65 % o más. Cada 5 % más de catéter dentro de la vena redujo el riesgo de fallo un 29 % (HR 0,71; IC 95 % 0,60–0,83).
+- **Bahl 2020** [82]. Ensayo aleatorizado con 257 pacientes y catéteres de 20G: el de 6,35 cm duró una mediana de 136 h y el de 4,78 cm, 92 h. Con más de 2,75 cm dentro de la vena la mediana fue de 129 h; con 2,75 cm o menos, de 75 h.
+- Por eso se aconsejan catéteres largos, de 1,75 pulgadas (≈ 4,5 cm) como mínimo [79].
+- **En el simulador:**
+  - la **métrica** es la longitud de catéter dentro de la luz de la vena, en mm y como porcentaje de la longitud del catéter;
+  - el **criterio** de la evaluación es **≥ 65 %** [81]. Procede de un solo estudio observacional de 86 vías, y aplicarlo también al catéter de 64 mm es una extrapolación del simulador: Bahl 2020 expresa el óptimo como longitud absoluta (más de 2,75 cm dentro de la vena) [82];
+  - el tramo de piel a vena mide profundidad / sen(ángulo), así que una vena profunda «se come» el catéter si se entra con poco ángulo. En el caso, con el catéter introducido hasta el cono:
+
+| Catéter | 45° | 40° | 35° | 30° | 25° |
+|---|---|---|---|---|---|
+| 48 mm | ≈ 33 mm (69 %) | ≈ 32 mm (66 %) | ≈ 30 mm (63 %) | ≈ 28 mm (58 %) | — |
+| 64 mm | ≈ 49 mm (77 %) | — | — | ≈ 44 mm (68 %) | ≈ 40 mm (63 %) |
+
+### 13.3 Material
+
+- **Catéter sobre aguja** de 20G y 48 mm por defecto: es el de Fields 2012 [83] y el «largo» (4,78 cm) de Bahl 2020; el de 64 mm es su «extralargo» (6,35 cm) [82].
+- **Calibres** y color del cono: 22G, 0,9 mm, azul; 20G, 1,1 mm, rosa; 18G, 1,3 mm, verde [85].
+- **Sonda** lineal de 7,5 MHz o más, con **funda transparente estéril** y **lubricante estéril de un solo uso**; **compresor** proximal al punto de punción [80]. Piel desinfectada con clorhexidina o alcohol [79].
+- **Valores propios del simulador**, sin fuente: la punta del catéter queda 1,5 mm por detrás de la punta de la aguja (coherente con el consejo de avanzar 1–2 mm tras el reflujo [80]) y la aguja interior mide 0,3 mm menos de diámetro que el catéter.
+
+### 13.4 Técnica
+
+| Paso del simulador | Fundamento |
+|---|---|
+| Vena localizada y medida, en transversal | Vista transversal, con el marcador de la sonda a la izquierda del operador y la profundidad de la imagen a unas dos veces la de la vena; exploración previa con compresor [80] |
+| Compresor aplicado | Proximal al punto de punción [80] |
+| Asepsia | Funda y lubricante estériles [80] |
+| Catéter colocado | En transversal, el punto de entrada queda a una distancia de la sonda igual a la profundidad de la vena, con unos 45° [79]. También se puede entrar en transversal y pasar a longitudinal, o hacerlo todo en longitudinal [79] |
+| Punta de la aguja en la vena | La aguja indenta la pared y después la atraviesa; el reflujo confirma que la punta está en la luz. Hay que ver la punta durante todo el avance [80] |
+| Punta del catéter en la vena | Tras el reflujo se avanza 1–2 mm más para que entre también la punta del catéter [80]; «varios milímetros, hasta un centímetro» bajo visión directa [79] |
+| Catéter deslizado | Con la aguja quieta, el catéter se desliza sobre ella. Debe entrar con facilidad: si hay resistencia o dolor, no está en la vena y hay que parar y canalizar en otro punto [80] |
+| Aguja retirada | Después de deslizar el catéter [80] |
+| Compresor retirado y lavado con suero | Se suelta el compresor y se lava con unos 5 mL de suero, que debe entrar con facilidad; si se extravasa, se retira el catéter y se canaliza en otro punto [80] |
+
+### 13.5 Cómo se implementa
+
+- **Estados del catéter:** montado en la aguja (se mueve con ella) → deslizado sobre la aguja → aguja retirada.
+  - Con el catéter montado, la física es la de la aguja (§12): tienda, «pop», reflujo, pared posterior, transfixión, arteria, nervio.
+  - Al deslizarlo, si la punta de la aguja está en la luz pero la del catéter no ha entrado, **no progresa**. Si ha entrado, avanza sin resistencia: hasta la punta de la aguja va sobre ella y, a partir de ahí, se orienta con el eje de la vena, tiende al centro de la luz y resbala por la pared sin atravesarla.
+  - Con la punta de la aguja fuera de la luz, el catéter avanza recto por el tejido y la vía no es válida; el lavado produce entonces una **extravasación** (la misma colección anecoica de la infiltración del §5).
+  - Una vez deslizado el catéter, la aguja ya no avanza ni cambia de dirección: solo se retira. Es una simplificación del simulador.
+- **Imagen:** la aguja de acero se ve como en la punción de la FAV (línea brillante con reverberaciones y sombra). El catéter sin la aguja se dibuja como una **doble línea** más tenue, sin reverberaciones y casi sin sombra **[CC]**. El tramo curvo se aproxima con dos rectas.
+- **Lavado:** por el catéter, con la aguja retirada y el compresor suelto; 5 mL en 2,5 s.
+- **Evaluación:**
+
+| Criterio | Penalización |
+|---|---|
+| Catéter en la luz de una vena, con la aguja retirada | 35 |
+| ≥ 65 % del catéter dentro de la vena | 10 |
+| Sin punción arterial ni contacto con un nervio | 30 y 20 (se descuentan al producirse) |
+| Sin atravesar la pared posterior | 18 (al producirse) |
+| Técnica aséptica | 5 |
+| Compresor retirado al terminar | 3 |
+| Lavado con suero sin extravasación | 5 (y 12 por cada extravasación) |
+
+- **No se simula:** la fijación y el apósito, la extracción de muestras, el dolor del paciente, las válvulas venosas ni la trombosis de la vena. El ángulo se cambia pivotando sobre el punto de entrada, así que bajar la aguja tras el reflujo no es útil en una vena tan profunda y fina.
+
 ---
 
 ## Referencias
@@ -409,6 +495,17 @@ La imagen se calcula en ocho pases de GPU, uno tras otro.
 37. Chen S et al. *Hemodial Int* 2023;27:21–7.
 43. Estudios sobre DNTP (PMID 23059741; PMC10941806).
 73. Vezzani A et al. Ultrasound localization of central vein catheter and detection of postprocedural pneumothorax: an alternative to chest radiography. *Crit Care Med* 2010;38(2):533–538 (contraste con suero para confirmar la posición del catéter).
+
+### Vía periférica ecoguiada
+
+78. Franco-Sadud R et al. Recommendations on the Use of Ultrasound Guidance for Central and Peripheral Vascular Access in Adults: A Position Statement of the Society of Hospital Medicine. *J Hosp Med* 2019;14(9). doi:10.12788/jhm.3287. Reimpresión: https://mdedge.com/content/recommendations-use-ultrasound-guidance-central-and-peripheral-vascular-access-adults
+79. WikEM. Ultrasound-assisted peripheral line placement (revisión del 17 de abril de 2024). https://wikem.org/wiki/Ultrasound-assisted_peripheral_line_placement
+80. Liu YT. How To Do Ultrasound-Guided Peripheral Intravenous Catheter Insertion. *Manual MSD, versión para profesionales* (revisado en octubre de 2025). https://www.msdmanuals.com/professional/critical-care-medicine/how-to-do-peripheral-vascular-procedures/how-to-do-peripheral-vein-cannulation-ultrasound-guided
+81. Pandurangadu AV, Tucker J, Brackney AR, Bahl A. Ultrasound-guided intravenous catheter survival impacted by amount of catheter residing in the vein. *Emerg Med J* 2018;35(9):550–555. doi:10.1136/emermed-2017-206803 (resumen; PMID 30021833).
+82. Bahl A, Hijazi M, Chen NW, Lachapelle-Clavette L, Price J. Ultralong Versus Standard Long Peripheral Intravenous Catheters: A Randomized Controlled Trial of Ultrasonographically Guided Catheter Survival. *Ann Emerg Med* 2020;76(2):134–142. doi:10.1016/j.annemergmed.2019.11.013 (resumen; PMID 31955940).
+83. Fields JM, Dean AJ, Todman RW et al. The effect of vessel depth, diameter, and location on ultrasound-guided peripheral intravenous catheter longevity. *Am J Emerg Med* 2012;30(7):1134–1140. doi:10.1016/j.ajem.2011.07.027 (resumen; PMID 22078967).
+84. Witting MD, Schenkel SM, Lawner BJ, Euerle BD. Effects of vein width and depth on ultrasound-guided peripheral intravenous success rates. *J Emerg Med* 2010;39(1):70–75. doi:10.1016/j.jemermed.2009.01.003 (resumen; PMID 19272730).
+85. Doyle E. *Paediatric Anaesthesia*. Oxford University Press, 2007, p. 110 (calibre, diámetro y color de los catéteres periféricos; citado en Wikipedia, «Peripheral venous catheter»).
 
 ### Complicaciones de la punción
 

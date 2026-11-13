@@ -6,17 +6,16 @@ import { Color, Matrix4, TOUCH, Vector2, Vector3, WebGLRenderer } from 'three';
 import { ArmShape } from '../anatomy/armShape';
 import { CaseDef, CASES, caseById } from '../anatomy/cases';
 import { AnatomyModel, Structure } from '../anatomy/model';
-import { Needle, NeedleEvent, NeedleRole, roleLabel, stateLabel } from '../interaction/needle';
+import { deviceLabel, Needle, NeedleEvent, roleLabel, stageLabel, stateLabel } from '../interaction/needle';
 import { clampProbe, computePose, defaultProbeState, ProbeState, skinParamAbove, skinParamOf } from '../interaction/probePose';
 import { SceneManager, CameraPreset, defaultRoomConfig, placeDefaults, NeedleVisual } from '../scene/SceneManager';
 import { DopplerAudio, SpectralDoppler } from '../sim/spectral';
-import { FLUSH_INJECT_S, FlushState, flushParams, innerDiameter, JET_LEN_MM, jetVelocity } from '../sim/flush';
-import { GAUGES } from '../scene/instruments';
+import { FLUSH_INJECT_S, FlushState, flushParams, innerDiameter, JET_LEN_MM, jetVelocity, PIV_FLUSH_ML } from '../sim/flush';
 import { defaultSettings, MachineSettings, Quality, SOFT_LIFT, UltrasoundSim } from '../sim/UltrasoundSim';
 import type { ChecklistState } from '../training/checklist';
 import { evaluateErgonomics, ErgoResult } from '../training/ergonomics';
 import { LESSONS, Lesson, LessonCtx } from '../training/lessons';
-import { FinalCheck, Metrics } from '../training/metrics';
+import { catheterPct, FinalCheck, Metrics, pivChecks } from '../training/metrics';
 import { elementRect, ImageView } from '../ui/imageView';
 import { Monitor } from '../ui/monitor';
 import { buildConsole } from '../ui/console';
@@ -91,6 +90,8 @@ export class App {
   tourniquet = false;
   /** preparación aséptica: piel desinfectada, funda y gel estériles */
   asepsis = false;
+  /** el compresor estaba puesto al puncionar (vía periférica) */
+  private tqAtPuncture = false;
   /** interfaz básica (solo los controles de la punción) o avanzada (todos) */
   uiLevel: 'basico' | 'avanzado' = 'basico';
   needles: Needle[] = [new Needle('arterial'), new Needle('venosa')];
@@ -212,8 +213,8 @@ export class App {
     Object.assign(this.probe, { x: cd.probeStart.x, theta: cd.probeStart.theta, rot: cd.probeStart.rot, tilt: 0, rock: 0, press: 0.6 });
     // preajuste de profundidad según el vaso de acceso
     const s = this.sim.settings;
-    s.depth = cd.id === 'bc_obeso' ? 35 : 25;
-    s.focus = cd.id === 'bc_obeso' ? 16 : 8;
+    s.depth = cd.image?.depth ?? (cd.id === 'bc_obeso' ? 35 : 25);
+    s.focus = cd.image?.focus ?? (cd.id === 'bc_obeso' ? 16 : 8);
     s.frozen = false;
     this.sim.resetCine();
     this.resetNeedles();
@@ -234,13 +235,18 @@ export class App {
   }
 
   resetNeedles() {
-    const role0: NeedleRole = 'arterial';
-    const gauge = this.needles[0]?.gauge ?? 15;
-    this.needles = [new Needle(role0), new Needle('venosa')];
-    for (const n of this.needles) {
-      n.gauge = gauge;
-      n.onEvent = (e) => this.onNeedleEvent(n, e);
+    const prev = this.needles[0];
+    this.needles = [new Needle('arterial'), new Needle('venosa')];
+    if (this.isPiv()) {
+      // vía periférica: un solo dispositivo, el catéter sobre aguja (conserva el calibre y la longitud elegidos)
+      this.needles[0].setCatheter(prev?.cath ? prev.gauge : 20, prev?.cath?.length ?? 48);
+      this.activeNeedle = 0;
+    } else {
+      const gauge = prev && !prev.cath ? prev.gauge : 15;
+      for (const n of this.needles) n.gauge = gauge;
     }
+    for (const n of this.needles) n.onEvent = (e) => this.onNeedleEvent(n, e);
+    this.tqAtPuncture = false;
     this.needleFlash = [0, 0];
     this.scene?.resetNeedles();
     this.sim.needles = [];
@@ -283,15 +289,24 @@ export class App {
   statusLine(): string {
     if (this.needleMode()) {
       const n = this.needle;
+      // «Aguja arterial 15G» / «Catéter 20G»
+      const name = cap(deviceLabel(n));
       if (!n.placed)
         return this.dt(
           tr(
-            `Aguja ${roleLabel(n.role)} ${n.gauge}G sin colocar: {{pulsa N para colocarla|pulsa «Fuera de plano» o «En plano»}}`,
-            `${cap(roleLabel(n.role))} needle ${n.gauge}G not placed: {{press N to place it|tap "Out-of-plane" or "In-plane"}}`,
+            `${name} sin colocar: {{pulsa N para ${n.cath ? 'colocarlo' : 'colocarla'}|pulsa «Fuera de plano» o «En plano»}}`,
+            `${name} not placed: {{press N to place it|tap "Out-of-plane" or "In-plane"}}`,
           ),
         );
       const where = n.inVessel ? ` (${n.inVessel.def.short ?? n.inVessel.def.name})` : '';
-      return `${tr(`Aguja ${roleLabel(n.role)}`, `${cap(roleLabel(n.role))} needle`)} ${n.gauge}G · ${n.angle.toFixed(0)}° · ${Math.max(0, n.depth).toFixed(1)} mm · ${stateLabel(n.state)}${where}${n.confirmed ? tr(' · evaluada', ' · evaluated') : ''}`;
+      const done = n.confirmed ? (n.cath ? tr(' · evaluado', ' · evaluated') : tr(' · evaluada', ' · evaluated')) : '';
+      if (n.cath) {
+        const mm = this.metrics.catheterInVein;
+        const inVein = mm > 0 ? tr(` · ${mm.toFixed(0)} mm en vena (${catheterPct(mm, n.cath.length)} %)`, ` · ${mm.toFixed(0)} mm in vein (${catheterPct(mm, n.cath.length)}%)`) : '';
+        const ins = n.needleOut ? '' : ` · ${n.angle.toFixed(0)}° · ${Math.max(0, n.depth).toFixed(1)} mm`;
+        return `${name}${ins} · ${stateLabel(n.state)}${where} · ${stageLabel(n.cath.stage)}${inVein}${done}`;
+      }
+      return `${name} · ${n.angle.toFixed(0)}° · ${Math.max(0, n.depth).toFixed(1)} mm · ${stateLabel(n.state)}${where}${done}`;
     }
     const p = this.probe;
     const rotN = ((p.rot % 180) + 180) % 180;
@@ -311,6 +326,11 @@ export class App {
   /** Texto según el dispositivo (ver `deviceText`). */
   dt(s: string): string {
     return deviceText(s, this.touchUI);
+  }
+
+  /** El caso es de vía periférica: catéter sobre aguja, con su lista de pasos y su evaluación. */
+  isPiv(): boolean {
+    return this.caseDef.procedure === 'piv';
   }
 
   /** La aguja está disponible: modo Punción o lección de punción en curso. */
@@ -412,8 +432,8 @@ export class App {
   placeNeedleAuto(approach: 'oop' | 'ip' = this.viewApproach()) {
     this.approach = approach;
     const n = this.needle;
-    if (n.placed && n.depth > 0) {
-      this.toast(tr('Retira primero la aguja actual', 'Withdraw the current needle first'), 'warn');
+    if (n.inserted) {
+      this.toast(n.cath ? tr('Retira primero el catéter actual', 'Remove the current catheter first') : tr('Retira primero la aguja actual', 'Withdraw the current needle first'), 'warn');
       return;
     }
     clampProbe(this.probe);
@@ -442,14 +462,20 @@ export class App {
       const s = pose.L.dot(xArm) >= 0 ? 1 : -1; // entrar por el extremo distal
       entry = pose.F.clone().addScaledVector(pose.L, -s * (pose.width / 2 + 4));
       dirH = pose.L.clone().multiplyScalar(s);
-      angle = this.caseDef.access?.graft ? 40 : 25;
+      // la vena profunda de una vía periférica pide más ángulo: con poco, el trayecto hasta ella se come el catéter
+      angle = this.isPiv() ? (this.caseDef.access?.angle ?? 45) : this.caseDef.access?.graft ? 40 : 25;
     }
     const par = skinParamOf(entry);
     const f = this.arm.skinFrame(par.x, par.theta);
     const heading = (Math.atan2(dirH.dot(f.Tt), dirH.dot(f.Tx)) * 180) / Math.PI;
     n.place(this.arm, par.x, par.theta, heading, Math.round(angle));
     const ap = approach === 'oop' ? tr('transversal (fuera de plano)', 'short-axis (out-of-plane)') : tr('longitudinal (en plano)', 'long-axis (in-plane)');
-    this.toast(tr(`Aguja ${roleLabel(n.role)} (${n.gauge}G): abordaje ${ap}, ${Math.round(angle)}°`, `${cap(roleLabel(n.role))} needle (${n.gauge}G): ${ap} approach, ${Math.round(angle)}°`), 'info');
+    this.toast(
+      n.cath
+        ? tr(`Catéter sobre aguja (${n.gauge}G, ${n.cath.length} mm): abordaje ${ap}, ${Math.round(angle)}°`, `Over-the-needle catheter (${n.gauge}G, ${n.cath.length} mm): ${ap} approach, ${Math.round(angle)}°`)
+        : tr(`Aguja ${roleLabel(n.role)} (${n.gauge}G): abordaje ${ap}, ${Math.round(angle)}°`, `${cap(roleLabel(n.role))} needle (${n.gauge}G): ${ap} approach, ${Math.round(angle)}°`),
+      'info',
+    );
     this.remindAsepsis();
     this.panels.renderMetrics();
   }
@@ -480,8 +506,8 @@ export class App {
 
   placeNeedleAt(p: Vector3) {
     const n = this.needle;
-    if (n.placed && n.depth > 0) {
-      this.toast(tr('Retira primero la aguja actual', 'Withdraw the current needle first'), 'warn');
+    if (n.inserted) {
+      this.toast(n.cath ? tr('Retira primero el catéter actual', 'Remove the current catheter first') : tr('Retira primero la aguja actual', 'Withdraw the current needle first'), 'warn');
       return;
     }
     const par = skinParamOf(p);
@@ -499,14 +525,60 @@ export class App {
     this.remindAsepsis();
   }
 
+  /**
+   * Retira la aguja activa. Con un catéter ya deslizado, la primera vez saca sólo la aguja (el catéter
+   * se queda en la vena) y la segunda retira el catéter.
+   */
   withdrawNeedle() {
     const n = this.needle;
     if (!n.placed) return;
+    if (n.cath?.stage === 'avanzado') {
+      n.depth = -3;
+      n.update(this.model, this.time, this.accessIds());
+      return;
+    }
+    if (n.cath?.stage === 'aguja-retirada') {
+      n.removeCatheter(this.time);
+      n.placed = false;
+      this.needleFlash[this.activeNeedle] = 0;
+      return;
+    }
     n.depth = -3;
     n.update(this.model, this.time, this.accessIds());
     n.placed = false;
     this.needleFlash[this.activeNeedle] = 0;
     this.toast(tr('Aguja retirada', 'Needle withdrawn'), 'info');
+  }
+
+  /** Vía periférica: cambia el calibre o la longitud del catéter, con el dispositivo fuera de la piel. */
+  setCatheter(gauge: number, length: number) {
+    const n = this.needle;
+    if (!n.cath) return;
+    if (n.inserted) {
+      this.toast(tr('Retira primero el catéter actual', 'Remove the current catheter first'), 'warn');
+      return;
+    }
+    n.setCatheter(gauge, length);
+    this.scene.resetNeedles();
+  }
+
+  /** Aviso que podría repetirse en cada fotograma (tecla mantenida): uno cada 3 s como mucho. */
+  private lastHint = -10;
+  private hint(msg: string) {
+    if (this.time - this.lastHint < 3) return;
+    this.lastHint = this.time;
+    this.toast(msg, 'warn');
+  }
+
+  /** Vía periférica: desliza el catéter sobre la aguja, que se mantiene quieta (tecla U). */
+  slideCatheter(mm: number) {
+    const n = this.needle;
+    if (!n.cath || n.confirmed || n.needleOut) return;
+    if (!n.placed || n.depth <= 0) {
+      this.hint(tr('Primero lleva la punta de la aguja a la vena; después se desliza el catéter', 'First bring the needle tip into the vein; then slide the catheter'));
+      return;
+    }
+    n.slideCatheter(this.model, mm, this.time);
   }
 
   advanceNeedle(mm: number) {
@@ -519,7 +591,22 @@ export class App {
       return;
     }
     if (n.confirmed) return;
-    n.depth = Math.max(-5, Math.min(n.length - 2, n.depth + mm));
+    if (n.cath && n.cath.stage !== 'montado') {
+      // con el catéter deslizado la aguja ya no avanza: sólo se retira por dentro de él
+      if (n.needleOut) return;
+      if (mm > 0) {
+        this.hint(
+          this.dt(
+            tr(
+              'Con el catéter deslizado la aguja ya no se avanza: retírala {{(↓ o «Retirar aguja»)|(«Retirar»)}}',
+              'Once the catheter is threaded the needle is not advanced again: remove it {{(↓ or "Remove needle")|("Remove")}}',
+            ),
+          ),
+        );
+        return;
+      }
+    }
+    n.depth = Math.max(-5, Math.min(n.maxDepth, n.depth + mm));
   }
 
   accessIds(): Set<string> {
@@ -531,6 +618,9 @@ export class App {
   private onNeedleEvent(n: Needle, e: NeedleEvent) {
     this.metrics.onEvent(e);
     this.lessonEvents.add(e.type);
+    // compresor puesto al puncionar (lista de pasos de la vía periférica)
+    if (e.type === 'skin') this.tqAtPuncture = this.tourniquet;
+    else if (e.type === 'tent' || e.type === 'flash') this.tqAtPuncture ||= this.tourniquet;
     if (e.type !== 'redirect' || this.mode === 'cannulate') this.toast(e.msg, e.severity === 'error' ? 'error' : e.severity === 'warn' ? 'warn' : e.severity === 'ok' ? 'ok' : 'info');
     if (e.type === 'transfix') this.addHematoma(n);
     this.panels.logEvent(e);
@@ -563,38 +653,69 @@ export class App {
    */
   flushNeedle() {
     const n = this.needle;
-    if (!n.placed || n.depth <= 0) {
+    if (!n.inserted) {
       this.toast(this.dt(tr('Primero introduce la aguja; después lava con suero {{(J)|(«Suero»)}} para comprobar la posición', 'Insert the needle first, then flush with saline {{(J)|("Saline")}} to check its position')), 'warn');
       return;
+    }
+    if (n.cath) {
+      // por el catéter se lava con la aguja ya retirada y el compresor suelto
+      if (!n.needleOut) {
+        this.toast(tr('Retira primero la aguja: el suero se inyecta por el catéter', 'Remove the needle first: saline is injected through the catheter'), 'warn');
+        return;
+      }
+      if (this.tourniquet) {
+        this.toast(tr('Suelta el compresor antes de lavar con suero', 'Release the tourniquet before flushing with saline'), 'warn');
+        return;
+      }
     }
     if (this.flush && this.time - this.flush.t0 < FLUSH_INJECT_S) return;
     const ev = (type: NeedleEvent['type'], msg: string, severity: NeedleEvent['severity'], struct?: string) =>
       this.onNeedleEvent(n, { t: this.time, type, msg, severity, struct });
     if (n.state === 'luz' && n.inVessel) {
       const st = n.inVessel;
-      const smp = st.samples[this.model.nearestSample(st, n.tip).idx];
+      const smp = st.samples[this.model.nearestSample(st, n.deviceTip()).idx];
       const r = smp.r * st.dyn.radiusScale;
       const q = Math.abs(st.dyn.qNow);
-      const od = GAUGES[n.gauge]?.od ?? 1.8;
       this.flush = {
         t0: this.time,
         sidx: st.index,
         vmean: (q * 1000) / (Math.PI * r * r),
         qVessel: q,
-        jetVel: jetVelocity(innerDiameter(od)),
+        jetVel: jetVelocity(innerDiameter(n.od), n.cath ? PIV_FLUSH_ML / FLUSH_INJECT_S : undefined),
         flowDir: smp.t.clone().multiplyScalar(st.dyn.qNow >= 0 ? 1 : -1),
         needle: this.activeNeedle,
       };
       const name = st.def.short ?? st.def.name;
-      ev(
-        'flush',
-        tr(`Lavado con suero: entra sin resistencia y las microburbujas recorren la luz (${name}): punta intraluminal`, `Saline flush: flows without resistance and microbubbles travel along the lumen (${name}): tip intraluminal`),
-        'ok',
-        st.def.id,
-      );
+      if (n.cath && st.def.kind !== 'vein') {
+        ev('flush', tr(`El suero fluye, pero el catéter está en una arteria (${name}): no es una vía venosa`, `Saline flows, but the catheter is in an artery (${name}): this is not a venous line`), 'warn', st.def.id);
+      } else if (n.cath) {
+        n.cath.flushed = true;
+        ev(
+          'flush',
+          tr(`Lavado con suero: entra sin resistencia y las microburbujas recorren la vena (${name}): catéter en la luz`, `Saline flush: flows without resistance and microbubbles travel along the vein (${name}): catheter in the lumen`),
+          'ok',
+          st.def.id,
+        );
+      } else {
+        ev(
+          'flush',
+          tr(`Lavado con suero: entra sin resistencia y las microburbujas recorren la luz (${name}): punta intraluminal`, `Saline flush: flows without resistance and microbubbles travel along the lumen (${name}): tip intraluminal`),
+          'ok',
+          st.def.id,
+        );
+      }
     } else {
       this.addInfiltration(n);
-      ev('infiltration', tr('Infiltración: el suero se acumula en el tejido y no en la luz. Detén el lavado y recoloca la aguja.', 'Infiltration: saline is pooling in the tissue, not in the lumen. Stop the flush and reposition the needle.'), 'error');
+      ev(
+        'infiltration',
+        n.cath
+          ? tr(
+              'Extravasación: el suero se acumula en el tejido y no en la vena. Detén el lavado, retira el catéter y canaliza en otro punto.',
+              'Extravasation: saline is pooling in the tissue, not in the vein. Stop the flush, remove the catheter and cannulate at another site.',
+            )
+          : tr('Infiltración: el suero se acumula en el tejido y no en la luz. Detén el lavado y recoloca la aguja.', 'Infiltration: saline is pooling in the tissue, not in the lumen. Stop the flush and reposition the needle.'),
+        'error',
+      );
     }
   }
 
@@ -605,7 +726,7 @@ export class App {
    */
   private addInfiltration(n: Needle) {
     if (this.hematomas.length >= 4) return;
-    const tip = n.tip.clone();
+    const tip = n.deviceTip();
     const near = n.tentStruct ?? n.punctures[n.punctures.length - 1]?.st ?? this.accessStruct() ?? null;
     let a = tip.clone();
     let b = tip.clone();
@@ -642,12 +763,21 @@ export class App {
   /** Evalúa la punción actual con los criterios de las guías. */
   confirmPuncture() {
     const n = this.needle;
-    if (!n.placed || n.depth <= 0) {
-      this.toast(tr('No hay aguja insertada', 'No needle inserted'), 'warn');
+    if (!n.inserted) {
+      this.toast(n.cath ? tr('No hay ningún catéter insertado', 'No catheter inserted') : tr('No hay aguja insertada', 'No needle inserted'), 'warn');
       return;
     }
     if (n.confirmed) {
-      this.toast(tr('Esta punción ya está evaluada. Retira la aguja para repetir.', 'This cannulation has already been evaluated. Withdraw the needle to repeat it.'), 'info');
+      this.toast(
+        n.cath
+          ? tr('Esta vía ya está evaluada. Retira el catéter para repetir.', 'This line has already been evaluated. Remove the catheter to repeat it.')
+          : tr('Esta punción ya está evaluada. Retira la aguja para repetir.', 'This cannulation has already been evaluated. Withdraw the needle to repeat it.'),
+        'info',
+      );
+      return;
+    }
+    if (n.cath) {
+      this.confirmCatheter(n);
       return;
     }
     const checks: FinalCheck[] = [];
@@ -708,6 +838,43 @@ export class App {
     const graft = acc?.graft;
     if (graft) checks.push({ label: tr('Sin compresor en prótesis', 'No tourniquet on a graft'), ok: !this.tourniquet, detail: this.tourniquet ? tr('Compresor aplicado', 'Tourniquet applied') : OK, penalty: 5 });
     else checks.push({ label: tr('Compresor aplicado (FAV nativa)', 'Tourniquet applied (native AVF)'), ok: this.tourniquet, detail: this.tourniquet ? YES : tr('No (la vena se distiende menos)', 'No (the vein distends less)'), penalty: 2 });
+    this.finishEvaluation(n, checks, `${roleLabel(n.role)} ${n.gauge}G`, (score) =>
+      inAccess
+        ? { msg: tr(`Punción ${roleLabel(n.role)} evaluada: ${score}/100`, `${cap(roleLabel(n.role))} cannulation evaluated: ${score}/100`), ok: true }
+        : { msg: tr('Punción no válida: la punta no está en la luz', 'Invalid cannulation: the tip is not in the lumen'), ok: false },
+    );
+  }
+
+  /** Evalúa la vía periférica: catéter en la vena con la aguja retirada, longitud dentro de la vena y complicaciones. */
+  private confirmCatheter(n: Needle) {
+    const c = n.cath!;
+    const v = n.needleOut ? n.inVessel : c.vessel;
+    const inVeinMm = n.catheterInVein(this.model);
+    this.metrics.catheterInVein = inVeinMm;
+    this.metrics.catheterLength = c.length;
+    const checks = pivChecks({
+      needleOut: n.needleOut,
+      vessel: v ? { name: v.def.name, kind: v.def.kind } : null,
+      inVeinMm,
+      lengthMm: c.length,
+      transfixed: n.transfixed,
+      arteryHit: n.arteryHit,
+      nerveHit: n.nerveHit,
+      asepsis: this.asepsis,
+      tourniquet: this.tourniquet,
+      flushed: c.flushed,
+      infiltrations: this.metrics.infiltrations,
+    });
+    const valid = checks[0].ok === true;
+    this.finishEvaluation(n, checks, tr(`catéter ${n.gauge}G · ${c.length} mm`, `${n.gauge}G catheter · ${c.length} mm`), (score) =>
+      valid
+        ? { msg: tr(`Vía periférica evaluada: ${score}/100`, `Peripheral IV evaluated: ${score}/100`), ok: true }
+        : { msg: tr('Vía no válida: el catéter no está en la luz de una vena con la aguja retirada', 'Invalid line: the catheter is not in a vein lumen with the needle removed'), ok: false },
+    );
+  }
+
+  /** Guarda la evaluación en la sesión y en el historial y muestra el resultado. */
+  private finishEvaluation(n: Needle, checks: FinalCheck[], device: string, result: (score: number) => { msg: string; ok: boolean }) {
     this.metrics.checks = checks;
     n.confirmed = true;
     const score = this.metrics.score();
@@ -717,7 +884,7 @@ export class App {
       caseTitle: this.caseDef.short,
       approach: this.approach === 'oop' ? tr('Transversal (fuera de plano)', 'Short-axis (out-of-plane)') : tr('Longitudinal (en plano)', 'Long-axis (in-plane)'),
       score,
-      needle: `${roleLabel(n.role)} ${n.gauge}G`,
+      needle: device,
       checks,
     };
     this.history.push(rec);
@@ -726,12 +893,8 @@ export class App {
     } catch {
       /* almacenamiento no disponible */
     }
-    this.toast(
-      inAccess
-        ? tr(`Punción ${roleLabel(n.role)} evaluada: ${score}/100`, `${cap(roleLabel(n.role))} cannulation evaluated: ${score}/100`)
-        : tr('Punción no válida: la punta no está en la luz', 'Invalid cannulation: the tip is not in the lumen'),
-      inAccess ? 'ok' : 'error',
-    );
+    const r = result(score);
+    this.toast(r.msg, r.ok ? 'ok' : 'error');
     this.panels.renderMetrics();
     this.panels.showTab('metrics');
     this.focus?.onEvaluated();
@@ -823,6 +986,22 @@ export class App {
       angleToVessel: n.placed ? n.angleToVessel(this.model) : null,
       flushes: this.metrics.flushes,
       confirmed: n.confirmed,
+      piv: n.cath ? this.pivChecklistState(n) : undefined,
+    };
+  }
+
+  private pivChecklistState(n: Needle): NonNullable<ChecklistState['piv']> {
+    const c = n.cath!;
+    const mm = n.placed ? n.catheterInVein(this.model) : 0;
+    // en una arteria el catéter está en una luz, pero no en una vena: esos pasos no se marcan
+    const inVein = n.placed && n.catheterVessel(this.model)?.def.kind === 'vein';
+    return {
+      tourniquetAtPuncture: n.inserted ? this.tqAtPuncture : this.tourniquet,
+      catheterTipInVein: inVein,
+      inVeinPct: mm > 0 ? catheterPct(mm, c.length) : null,
+      threaded: inVein && c.stage !== 'montado',
+      needleOut: n.placed && n.needleOut,
+      flushed: c.flushed,
     };
   }
 
@@ -848,8 +1027,8 @@ export class App {
   resetMachine() {
     const keep = { mode: this.sim.settings.mode, pw: this.sim.settings.pw };
     Object.assign(this.sim.settings, defaultSettings(), keep);
-    this.sim.settings.depth = this.caseDef.id === 'bc_obeso' ? 35 : 25;
-    this.sim.settings.focus = this.caseDef.id === 'bc_obeso' ? 16 : 8;
+    this.sim.settings.depth = this.caseDef.image?.depth ?? (this.caseDef.id === 'bc_obeso' ? 35 : 25);
+    this.sim.settings.focus = this.caseDef.image?.focus ?? (this.caseDef.id === 'bc_obeso' ? 16 : 8);
     void this.defaultsSettings;
   }
 
@@ -969,7 +1148,7 @@ export class App {
     };
     // teclas que pueden repetirse al mantenerlas pulsadas; el resto son conmutadores (una vez por pulsación)
     const repeatable = new Set(['+', '=', '-', '[', ']', ',', '.']);
-    const held = new Set(['w', 'a', 's', 'd', 'q', 'e', 'r', 'f', 't', 'g', 'z', 'x', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'pageup', 'pagedown']);
+    const held = new Set(['w', 'a', 's', 'd', 'q', 'e', 'r', 'f', 't', 'g', 'z', 'x', 'u', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'pageup', 'pagedown']);
     window.addEventListener('keydown', (e) => {
       if (isTyping()) return;
       // no interferir con atajos del navegador o del sistema (Ctrl+C, Cmd+R…)
@@ -1253,7 +1432,10 @@ export class App {
     if (n.placed && this.needleMode()) {
       if (k.has('arrowup')) this.advanceNeedle(4 * dt * fine);
       if (k.has('arrowdown')) this.advanceNeedle(-4 * dt * fine);
-      if (!n.confirmed) {
+      // vía periférica: deslizar el catéter sobre la aguja
+      if (k.has('u')) this.slideCatheter(6 * dt * fine);
+      // con el catéter deslizado la aguja ya no cambia de dirección
+      if (!n.confirmed && !(n.cath && n.cath.stage !== 'montado')) {
         if (k.has('arrowleft')) n.heading -= 15 * dt * fine;
         if (k.has('arrowright')) n.heading += 15 * dt * fine;
         if (k.has('pageup')) n.angle = Math.min(70, n.angle + 10 * dt * fine);
@@ -1288,7 +1470,18 @@ export class App {
     for (let i = 0; i < this.needles.length; i++) {
       const n = this.needles[i];
       if (!n.placed) {
-        needleVis.push({ tip: new Vector3(), dir: new Vector3(1, 0, 0), length: n.length, gauge: n.gauge, role: n.role, flash: 0, arterialBlood: false, visible: false });
+        // el tipo de dispositivo va también sin colocar: la escena crea su malla con el primer fotograma
+        needleVis.push({
+          tip: new Vector3(),
+          dir: new Vector3(1, 0, 0),
+          length: n.length,
+          gauge: n.gauge,
+          role: n.role,
+          flash: 0,
+          arterialBlood: false,
+          visible: false,
+          catheter: n.cath ? { length: n.cath.length, path: [], needleIn: true } : undefined,
+        });
         continue;
       }
       n.computeGeometry();
@@ -1303,8 +1496,20 @@ export class App {
         this.needleFlash[i] = Math.min(1, this.needleFlash[i] + dt * rate);
       }
       const puls = n.inVessel && n.inVessel.def.kind !== 'vein' ? 0.85 + 0.15 * Math.sin(t * 2 * Math.PI * (this.model.hr / 60)) : 1;
-      needleVis.push({ tip: n.tip.clone(), dir: n.dir.clone(), length: n.length, gauge: n.gauge, role: n.role, flash: this.needleFlash[i] * puls, arterialBlood: n.flashArterial, visible: true });
-      renders.push({ back: n.backPoint(), tip: n.tip.clone(), radius: n.radius, active: n.depth > -1 });
+      needleVis.push({
+        tip: n.tip.clone(),
+        dir: n.dir.clone(),
+        length: n.length,
+        gauge: n.gauge,
+        role: n.role,
+        flash: this.needleFlash[i] * puls,
+        arterialBlood: n.flashArterial,
+        visible: true,
+        catheter: n.cath ? { length: n.cath.length, path: n.catheterPath(), needleIn: !n.needleOut } : undefined,
+      });
+      if (!n.needleOut) renders.push({ back: n.backPoint(), tip: n.tip.clone(), radius: n.radius, active: n.depth > -1 });
+      // tramos de catéter que ya no llevan la aguja dentro
+      for (const seg of n.catheterEcho()) renders.push({ back: seg.a, tip: seg.b, radius: n.radius, active: true, plastic: true });
       if (n.tentStruct && n.tentAmount > 0) tent = { tip: n.tip.clone(), dir: n.dir.clone(), amount: n.tentAmount, structIndex: n.tentStruct.index };
       // métricas de visibilidad de la punta (sólo aguja activa)
       if (i === this.activeNeedle && n.depth > 0) {
@@ -1334,8 +1539,17 @@ export class App {
       this.monitor.flags.tipMarker = null;
       if (this.needle.placed === false) this.monitor.flags.guide = null;
     }
+    // catéter deslizado: la ayuda marca su punta, no la de la aguja (y sin aguja no hay trayectoria que prever)
+    const an = this.needle;
+    if (an.placed && an.cath && an.cath.stage !== 'montado') {
+      const im = this.sim.tissueToImage(an.deviceTip());
+      const half = this.sim.sliceThickness(Math.max(0, im.w)) / 2;
+      const inImg = Math.abs(im.u) < this.sim.pose.width / 2 && im.w > 0 && im.w < this.sim.settings.depth;
+      this.monitor.flags.tipMarker = { u: im.u, w: im.w, visible: inImg && Math.abs(im.e) < half, inPlane: Math.abs(im.e) < 3 };
+      if (an.needleOut) this.monitor.flags.guide = null;
+    }
     // guía también antes de insertar (aguja colocada sobre la piel)
-    if (this.needle.placed && this.needle.depth <= 0) {
+    if (this.needle.placed && this.needle.depth <= 0 && !this.needle.needleOut) {
       const n = this.needle;
       this.monitor.flags.tipMarker = null;
       const guide: { u: number; w: number; e: number }[] = [];
@@ -1353,7 +1567,7 @@ export class App {
     const nf = fl ? this.needles[fl.needle] : null;
     const fp = fl ? flushParams(fl, t) : null;
     if (fl && nf && nf.placed && fp && fp.active) {
-      this.sim.flush = { tip: nf.tip.clone(), dir: nf.dir.clone(), flowDir: fl.flowDir, sidx: fl.sidx, intensity: fp.intensity, tail: fp.tail, front: fp.front, jet: fp.jet, jetVel: fl.jetVel, jetLen: JET_LEN_MM };
+      this.sim.flush = { tip: nf.deviceTip(), dir: nf.deviceDir(), flowDir: fl.flowDir, sidx: fl.sidx, intensity: fp.intensity, tail: fp.tail, front: fp.front, jet: fp.jet, jetVel: fl.jetVel, jetLen: JET_LEN_MM };
     } else {
       this.flush = null;
       this.sim.flush = null;
@@ -1415,6 +1629,10 @@ export class App {
       // colapso del vaso de acceso (métricas): recalculado a 5 Hz, no en cada fotograma
       const acc = this.accessStruct();
       this.accessCollapse = acc ? this.collapseOf(acc.def.id) : 0;
+      // vía periférica: longitud de catéter dentro de la vena
+      const dev = this.needle;
+      this.metrics.catheterLength = dev.cath?.length ?? 0;
+      this.metrics.catheterInVein = dev.cath && dev.placed ? dev.catheterInVein(this.model) : 0;
       this.updateHud();
       this.consoleUpdate();
       this.panels.tick();
@@ -1498,7 +1716,8 @@ export class App {
     const nh = document.getElementById('needleHud')!;
     if (!nh.classList.contains('hidden')) {
       const role = roleLabel(n.role);
-      if (!n.placed) nh.innerHTML = tr(`Aguja <b>${role}</b> ${n.gauge}G\nSin colocar · pulsa <b>N</b> o "Colocar"`, `<b>${cap(role)}</b> needle ${n.gauge}G\nNot placed · press <b>N</b> or "Place"`);
+      if (n.cath) nh.innerHTML = this.catheterHud(n);
+      else if (!n.placed) nh.innerHTML = tr(`Aguja <b>${role}</b> ${n.gauge}G\nSin colocar · pulsa <b>N</b> o "Colocar"`, `<b>${cap(role)}</b> needle ${n.gauge}G\nNot placed · press <b>N</b> or "Place"`);
       else {
         const im = this.sim.tissueToImage(n.tip);
         nh.innerHTML =
@@ -1542,6 +1761,25 @@ export class App {
           : tr('<span class="muted">Coloca el volumen de muestra dentro de un vaso</span>', '<span class="muted">Place the sample volume inside a vessel</span>'),
       );
     } else this.monitor.setSpecMeasures('');
+  }
+
+  /** Recuadro de estado del catéter sobre aguja en la vista 3D. */
+  private catheterHud(n: Needle): string {
+    const c = n.cath!;
+    const head = tr(`Catéter <b>${n.gauge}G</b> · ${c.length} mm\n`, `<b>${n.gauge}G</b> catheter · ${c.length} mm\n`);
+    if (!n.placed) return head + tr('Sin colocar · pulsa <b>N</b> o un botón de abordaje', 'Not placed · press <b>N</b> or an approach button');
+    const where = n.inVessel ? ` (${n.inVessel.def.short ?? n.inVessel.def.name})` : '';
+    const mm = this.metrics.catheterInVein;
+    const pct = catheterPct(mm, c.length);
+    return (
+      head +
+      (n.needleOut
+        ? tr('Aguja retirada\n', 'Needle removed\n')
+        : tr(`Ángulo ${n.angle.toFixed(0)}° · aguja insertada ${Math.max(0, n.depth).toFixed(1)} mm\n`, `Angle ${n.angle.toFixed(0)}° · needle inserted ${Math.max(0, n.depth).toFixed(1)} mm\n`)) +
+      tr('Estado: ', 'Status: ') +
+      `<b>${stateLabel(n.state)}</b>${where} · ${stageLabel(c.stage)}\n` +
+      tr(`Catéter bajo la piel ${n.catheterInserted().toFixed(0)} mm · en la vena <b>${mm.toFixed(0)} mm</b> (${pct} %)`, `Catheter under the skin ${n.catheterInserted().toFixed(0)} mm · in the vein <b>${mm.toFixed(0)} mm</b> (${pct}%)`)
+    );
   }
 
   private checkLesson() {
