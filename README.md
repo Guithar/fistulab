@@ -116,11 +116,11 @@ Todos los casos se pueden usar con el brazo izquierdo o el derecho.
 El caso «Vía periférica difícil» usa el mismo brazo, la misma sonda y la misma física de aguja, con otro dispositivo y otra evaluación:
 
 - **Catéter sobre aguja** de 22G, 20G o 18G y de 48 o 64 mm, con tres estados: catéter montado en la aguja → **catéter deslizado** sobre ella (tecla `U`; la aguja ya no avanza y el catéter, flexible, sigue la luz de la vena) → **aguja retirada** (queda el catéter). Se ve en 3D y en la ecografía: la aguja de acero con sus reverberaciones y el catéter de plástico como una doble línea.
-- Tras el **reflujo**, la punta del catéter aún no está en la vena (queda por detrás del bisel): hay que avanzar 1–2 mm más. Si no, el catéter no progresa; y si se desliza con la aguja fuera de la luz, queda en el tejido.
+- Tras el **reflujo**, la punta del catéter aún no está en la vena (queda por detrás del bisel): hay que avanzar 1–2 mm más (Manual MSD). Si no, el catéter no progresa; y si se desliza con la aguja fuera de la luz, queda en el tejido.
 - **Torniquete:** el compresor distiende la vena; se suelta antes de lavar.
 - **Lista de pasos propia** (11 pasos) y **métrica nueva: longitud de catéter dentro de la vena** (mm y % de su longitud).
-- **Evaluación propia:** catéter en la luz de una vena con la aguja retirada, **≥ 65 % del catéter dentro de la vena**, sin punción de la arteria humeral ni contacto con el nervio mediano, sin transfixión, asepsia, compresor retirado y **lavado con suero sin extravasación**. No se aplican los criterios de la fístula (anastomosis, separación entre agujas, aguja arterial o venosa).
-- Las fuentes de cada cifra están en [`docs/FUNDAMENTOS.md` §13](docs/FUNDAMENTOS.md#13-vía-periférica-ecoguiada-catéter-sobre-aguja).
+- **Evaluación propia:** catéter en la luz de una vena con la aguja retirada, **≥ 65 % del catéter dentro de la vena** (Pandurangadu 2018, *Emerg Med J*), sin punción de la arteria humeral ni contacto con el nervio mediano, sin transfixión, asepsia, compresor retirado y **lavado con suero sin extravasación**. No se aplican los criterios de la fístula (anastomosis, separación entre agujas, aguja arterial o venosa).
+- La ficha del caso enlaza los artículos y las fuentes (Manual MSD, WikEM, Pandurangadu 2018, Bahl 2020, Fields 2012, Witting 2010), y la lección y la evaluación citan la suya junto a cada cifra. El detalle está en [`docs/FUNDAMENTOS.md` §13](docs/FUNDAMENTOS.md#13-vía-periférica-ecoguiada-catéter-sobre-aguja).
 
 ### Ergonomía (sala)
 

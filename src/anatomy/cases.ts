@@ -45,6 +45,8 @@ export interface CaseDef {
   procedure?: 'fav' | 'piv';
   /** profundidad de imagen y foco al cargar el caso (mm); por defecto, 25 y 8 */
   image?: { depth: number; focus: number };
+  /** artículos y fuentes de las cifras del caso, para enlazarlos en su ficha (el detalle está en docs/FUNDAMENTOS.md) */
+  sources?: { label: string; url: string }[];
 }
 
 type P = CtrlPt;
@@ -1523,17 +1525,17 @@ export const CASES: CaseDef[] = [
     difficulty: 3,
     accessType: tr('Sin FAV · catéter venoso periférico sobre aguja', 'No AVF · over-the-needle peripheral IV catheter'),
     indication: tr(
-      'Acceso venoso difícil: no hay venas visibles ni palpables y ya se ha fallado por referencias anatómicas. Es la situación en la que se recomienda canalizar con ecografía en tiempo real.',
-      'Difficult venous access: no visible or palpable veins, and landmark-based attempts have already failed. This is the situation in which real-time ultrasound guidance is recommended.',
+      'Acceso venoso difícil: no hay venas visibles ni palpables y ya se ha fallado por referencias anatómicas. Es la situación en la que la Society of Hospital Medicine (2019) recomienda canalizar con ecografía en tiempo real.',
+      'Difficult venous access: no visible or palpable veins, and landmark-based attempts have already failed. This is the situation in which the Society of Hospital Medicine (2019) recommends real-time ultrasound guidance.',
     ),
     description: tr(
-      'Paciente con obesidad y sin fístula que necesita una vía periférica. Las venas superficiales del antebrazo son finas (< 2 mm). La mejor diana es la vena basílica por encima del codo, en el límite de lo puncionable según la regla «3:1:3» (al menos 3 mm de diámetro y a 1 cm de profundidad, 1,5 cm como máximo): mide 2,6 mm, llega a unos 3 mm con el compresor y su pared anterior está a 1 cm de la piel. Más profundos discurren la arteria humeral, con sus dos venas, y el nervio mediano. Se canaliza con un catéter sobre aguja: tras el reflujo se avanza 1–2 mm más, se desliza el catéter con la aguja quieta y se retira la aguja.',
-      'Patient with obesity and no fistula who needs a peripheral IV. The superficial forearm veins are thin (< 2 mm). The best target is the basilic vein above the elbow, at the limit of what can be cannulated under the “3:1:3” rule (at least 3 mm in diameter and 1 cm deep, 1.5 cm at most): it measures 2.6 mm, reaches about 3 mm with a tourniquet, and its anterior wall lies 1 cm below the skin. Deeper down run the brachial artery, with its two veins, and the median nerve. It is cannulated with an over-the-needle catheter: after flashback you advance 1–2 mm further, slide the catheter while holding the needle still, and remove the needle.',
+      'Paciente con obesidad y sin fístula que necesita una vía periférica. Las venas superficiales del antebrazo son finas (< 2 mm). La mejor diana es la vena basílica por encima del codo, en el límite de lo puncionable según la regla «3:1:3» de WikEM (al menos 3 mm de diámetro y a 1 cm de profundidad, 1,5 cm como máximo): mide 2,6 mm, llega a unos 3 mm con el compresor y su pared anterior está a 1 cm de la piel. Más profundos discurren la arteria humeral, con sus dos venas, y el nervio mediano. Se canaliza con un catéter sobre aguja: tras el reflujo se avanza 1–2 mm más, se desliza el catéter con la aguja quieta y se retira la aguja (Manual MSD).',
+      'Patient with obesity and no fistula who needs a peripheral IV. The superficial forearm veins are thin (< 2 mm). The best target is the basilic vein above the elbow, at the limit of what can be cannulated under the WikEM “3:1:3” rule (at least 3 mm in diameter and 1 cm deep, 1.5 cm at most): it measures 2.6 mm, reaches about 3 mm with a tourniquet, and its anterior wall lies 1 cm below the skin. Deeper down run the brachial artery, with its two veins, and the median nerve. It is cannulated with an over-the-needle catheter: after flashback you advance 1–2 mm further, slide the catheter while holding the needle still, and remove the needle (MSD Manual).',
     ),
     objectives: [
       tr(
-        'Distinguir la vena de la arteria humeral: la vena se colapsa al presionar con la sonda y la arteria no.',
-        'Tell the vein from the brachial artery: the vein collapses under probe pressure and the artery does not.',
+        'Distinguir la vena de la arteria humeral: la vena se colapsa al presionar con la sonda y la arteria no (Manual MSD).',
+        'Tell the vein from the brachial artery: the vein collapses under probe pressure and the artery does not (MSD Manual).',
       ),
       tr(
         'Medir el diámetro y la profundidad de la vena con el compresor puesto y valorar si cumple la regla «3:1:3».',
@@ -1544,8 +1546,8 @@ export const CASES: CaseDef[] = [
         'Cannulate the vein: flashback, advance 1–2 mm further, slide the catheter over the needle and remove the needle.',
       ),
       tr(
-        'Dejar al menos el 65 % del catéter dentro de la vena y comprobar con suero que no hay extravasación.',
-        'Leave at least 65% of the catheter inside the vein and check with saline that there is no extravasation.',
+        'Dejar al menos el 65 % del catéter dentro de la vena (Pandurangadu 2018) y comprobar con suero que no hay extravasación.',
+        'Leave at least 65% of the catheter inside the vein (Pandurangadu 2018) and check with saline that there is no extravasation.',
       ),
     ],
     findings: [
@@ -1554,8 +1556,8 @@ export const CASES: CaseDef[] = [
         'Basilic vein ≈ 2.6 mm without a tourniquet and ≈ 3.1 mm with it; anterior wall ≈ 10.5 mm below the skin.',
       ),
       tr(
-        'Con el catéter de 48 mm y 40–45° quedan dentro de la vena ≈ 32–33 mm (66–69 %); con 35° o menos el trayecto hasta la vena es más largo y no se llega al 65 %. El de 64 mm deja más margen (≈ 77 % con 45°).',
-        'With the 48 mm catheter at 40–45°, ≈ 32–33 mm (66–69%) end up inside the vein; at 35° or less the path to the vein is longer and 65% is not reached. The 64 mm catheter leaves more margin (≈ 77% at 45°).',
+        'Con el catéter de 48 mm y 40–45° quedan dentro de la vena ≈ 32–33 mm (66–69 %); con 35° o menos el trayecto hasta la vena es más largo y no se llega al 65 %. El de 64 mm deja más margen (≈ 77 % con 45°). Con el 65 % o más dentro de la vena no falló ninguna vía en 72 h; con menos del 30 % fallaron todas (Pandurangadu 2018).',
+        'With the 48 mm catheter at 40–45°, ≈ 32–33 mm (66–69%) end up inside the vein; at 35° or less the path to the vein is longer and 65% is not reached. The 64 mm catheter leaves more margin (≈ 77% at 45°). With 65% or more inside the vein no line failed within 72 h; with less than 30% all of them failed (Pandurangadu 2018).',
       ),
       tr(
         'Arteria humeral (pulsátil, no se colapsa) y nervio mediano (patrón en panal), más profundos que la vena: una punción demasiado profunda puede alcanzarlos.',
@@ -1564,20 +1566,20 @@ export const CASES: CaseDef[] = [
     ],
     tips: [
       tr(
-        'Ajusta la profundidad de la imagen a unas dos veces la profundidad de la vena.',
-        'Set the image depth to about twice the depth of the vein.',
+        'Ajusta la profundidad de la imagen a unas dos veces la profundidad de la vena (Manual MSD).',
+        'Set the image depth to about twice the depth of the vein (MSD Manual).',
       ),
       tr(
-        'En transversal, entra a una distancia de la sonda igual a la profundidad de la vena, con unos 45°.',
-        'In short axis, enter the skin at a distance from the probe equal to the vein depth, at about 45°.',
+        'En transversal, entra a una distancia de la sonda igual a la profundidad de la vena, con unos 45° (WikEM).',
+        'In short axis, enter the skin at a distance from the probe equal to the vein depth, at about 45° (WikEM).',
       ),
       tr(
-        'No te pares en el reflujo: la punta del catéter queda por detrás del bisel de la aguja.',
-        'Do not stop at flashback: the catheter tip sits behind the needle bevel.',
+        'No te pares en el reflujo: avanza 1–2 mm más para que entre también la punta del catéter, que queda por detrás del bisel (Manual MSD).',
+        'Do not stop at flashback: advance 1–2 mm further so the catheter tip, which sits behind the bevel, enters too (MSD Manual).',
       ),
       tr(
-        'Si el catéter no se desliza con facilidad, no está en la vena: no lo fuerces.',
-        'If the catheter does not slide easily, it is not in the vein: do not force it.',
+        'Si el catéter no se desliza con facilidad, no está en la vena: no lo fuerces (Manual MSD).',
+        'If the catheter does not slide easily, it is not in the vein: do not force it (MSD Manual).',
       ),
     ],
     armOpts: { fatAdd: 9, sizeScale: 1.03 },
@@ -1633,6 +1635,58 @@ export const CASES: CaseDef[] = [
       depth: 10.5,
       note: tr('Diámetro con compresor (2,6 mm sin él). Vena en el límite de la regla «3:1:3».', 'Diameter with a tourniquet (2.6 mm without). Vein at the limit of the “3:1:3” rule.'),
     },
+    // las mismas referencias, con todas sus cifras, están en docs/FUNDAMENTOS.md §13 (n.º 75–81)
+    sources: [
+      {
+        label: tr(
+          'Liu YT. How To Do Ultrasound-Guided Peripheral Intravenous Catheter Insertion. Manual MSD, versión para profesionales (revisado en 2025): pasos del procedimiento.',
+          'Liu YT. How To Do Ultrasound-Guided Peripheral Intravenous Catheter Insertion. MSD Manual, Professional Version (reviewed 2025): procedure steps.',
+        ),
+        url: 'https://www.msdmanuals.com/professional/critical-care-medicine/how-to-do-peripheral-vascular-procedures/how-to-do-peripheral-vein-cannulation-ultrasound-guided',
+      },
+      {
+        label: tr(
+          'WikEM. Ultrasound-assisted peripheral line placement: regla «3:1:3», catéter largo y entrada a 45°.',
+          'WikEM. Ultrasound-assisted peripheral line placement: “3:1:3” rule, long catheter and 45° entry.',
+        ),
+        url: 'https://wikem.org/wiki/Ultrasound-assisted_peripheral_line_placement',
+      },
+      {
+        label: tr(
+          'Pandurangadu AV et al. Ultrasound-guided intravenous catheter survival impacted by amount of catheter residing in the vein. Emerg Med J 2018;35:550–555: ≥ 65 % del catéter dentro de la vena.',
+          'Pandurangadu AV et al. Ultrasound-guided intravenous catheter survival impacted by amount of catheter residing in the vein. Emerg Med J 2018;35:550–555: ≥ 65% of the catheter inside the vein.',
+        ),
+        url: 'https://doi.org/10.1136/emermed-2017-206803',
+      },
+      {
+        label: tr(
+          'Bahl A et al. Ultralong Versus Standard Long Peripheral Intravenous Catheters. Ann Emerg Med 2020;76:134–142: catéteres de 4,78 y 6,35 cm.',
+          'Bahl A et al. Ultralong Versus Standard Long Peripheral Intravenous Catheters. Ann Emerg Med 2020;76:134–142: 4.78 and 6.35 cm catheters.',
+        ),
+        url: 'https://doi.org/10.1016/j.annemergmed.2019.11.013',
+      },
+      {
+        label: tr(
+          'Fields JM et al. The effect of vessel depth, diameter, and location on ultrasound-guided peripheral intravenous catheter longevity. Am J Emerg Med 2012;30:1134–1140: las vías en venas profundas y proximales duran menos.',
+          'Fields JM et al. The effect of vessel depth, diameter, and location on ultrasound-guided peripheral intravenous catheter longevity. Am J Emerg Med 2012;30:1134–1140: lines in deep and proximal veins fail sooner.',
+        ),
+        url: 'https://doi.org/10.1016/j.ajem.2011.07.027',
+      },
+      {
+        label: tr(
+          'Witting MD et al. Effects of vein width and depth on ultrasound-guided peripheral intravenous success rates. J Emerg Med 2010;39:70–75: éxito según el diámetro y la profundidad.',
+          'Witting MD et al. Effects of vein width and depth on ultrasound-guided peripheral intravenous success rates. J Emerg Med 2010;39:70–75: success by diameter and depth.',
+        ),
+        url: 'https://doi.org/10.1016/j.jemermed.2009.01.003',
+      },
+      {
+        label: tr(
+          'Franco-Sadud R et al. Recommendations on the Use of Ultrasound Guidance for Central and Peripheral Vascular Access in Adults (Society of Hospital Medicine). J Hosp Med 2019: indicación en el acceso venoso difícil.',
+          'Franco-Sadud R et al. Recommendations on the Use of Ultrasound Guidance for Central and Peripheral Vascular Access in Adults (Society of Hospital Medicine). J Hosp Med 2019: indication in difficult venous access.',
+        ),
+        url: 'https://mdedge.com/content/recommendations-use-ultrasound-guidance-central-and-peripheral-vascular-access-adults',
+      },
+    ],
   },
 ];
 

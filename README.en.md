@@ -116,11 +116,11 @@ All cases can be used with either the left or the right arm.
 The “Difficult peripheral IV” case uses the same arm, the same probe and the same needle physics, with a different device and a different assessment:
 
 - **Over-the-needle catheter**, 22G, 20G or 18G and 48 or 64 mm long, with three states: catheter mounted on the needle → **catheter threaded** over it (`U` key; the needle no longer advances and the flexible catheter follows the vein lumen) → **needle removed** (the catheter stays). It is shown in 3D and on the ultrasound image: the steel needle with its reverberations and the plastic catheter as a double line.
-- After **flashback**, the catheter tip is not in the vein yet (it sits behind the bevel): you must advance 1–2 mm further. Otherwise the catheter will not advance; and if it is slid with the needle outside the lumen, it ends up in the tissue.
+- After **flashback**, the catheter tip is not in the vein yet (it sits behind the bevel): you must advance 1–2 mm further (MSD Manual). Otherwise the catheter will not advance; and if it is slid with the needle outside the lumen, it ends up in the tissue.
 - **Tourniquet:** it distends the vein and is released before flushing.
 - **Its own checklist** (11 steps) and a **new metric: catheter length inside the vein** (mm and % of its length).
-- **Its own assessment:** catheter in a vein lumen with the needle removed, **≥ 65% of the catheter inside the vein**, no brachial artery puncture or median nerve contact, no transfixion, asepsis, tourniquet released and **saline flush with no extravasation**. The fistula criteria (anastomosis, needle separation, arterial or venous needle) do not apply.
-- The source of each figure is in [`docs/en/FUNDAMENTALS.md` §13](docs/en/FUNDAMENTALS.md#13-ultrasound-guided-peripheral-iv-over-the-needle-catheter).
+- **Its own assessment:** catheter in a vein lumen with the needle removed, **≥ 65% of the catheter inside the vein** (Pandurangadu 2018, *Emerg Med J*), no brachial artery puncture or median nerve contact, no transfixion, asepsis, tourniquet released and **saline flush with no extravasation**. The fistula criteria (anastomosis, needle separation, arterial or venous needle) do not apply.
+- The case panel links the articles and sources (MSD Manual, WikEM, Pandurangadu 2018, Bahl 2020, Fields 2012, Witting 2010), and the lesson and the assessment cite theirs next to each figure. The details are in [`docs/en/FUNDAMENTALS.md` §13](docs/en/FUNDAMENTALS.md#13-ultrasound-guided-peripheral-iv-over-the-needle-catheter).
 
 ### Ergonomics (room)
 

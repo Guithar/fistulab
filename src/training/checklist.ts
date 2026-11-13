@@ -114,14 +114,14 @@ export function pivChecklist(s: ChecklistState): ChecklistItem[] {
     {
       label: tr('Punta del catéter en la vena', 'Catheter tip in the vein'),
       done: p.catheterTipInVein,
-      how: tr('tras el reflujo, avanza 1–2 mm más (Mayús + ↑): el catéter queda por detrás del bisel', 'after flashback, advance 1–2 mm further (Shift + ↑): the catheter sits behind the bevel'),
+      how: tr('tras el reflujo, avanza 1–2 mm más (Mayús + ↑): el catéter queda por detrás del bisel · Manual MSD', 'after flashback, advance 1–2 mm further (Shift + ↑): the catheter sits behind the bevel · MSD Manual'),
     },
     {
       label: tr('Catéter deslizado en la vena (≥ 65 % dentro)', 'Catheter threaded into the vein (≥ 65% inside)'),
       done: p.threaded && p.inVeinPct !== null && p.inVeinPct >= 65,
       how: tr(
-        `con la aguja quieta, desliza el catéter hasta el cono (U)${p.inVeinPct !== null ? ` · ahora ${p.inVeinPct} %` : ''}`,
-        `holding the needle still, slide the catheter up to the hub (U)${p.inVeinPct !== null ? ` · now ${p.inVeinPct}%` : ''}`,
+        `con la aguja quieta, desliza el catéter hasta el cono (U)${p.inVeinPct !== null ? ` · ahora ${p.inVeinPct} %` : ''} · Pandurangadu 2018`,
+        `holding the needle still, slide the catheter up to the hub (U)${p.inVeinPct !== null ? ` · now ${p.inVeinPct}%` : ''} · Pandurangadu 2018`,
       ),
     },
     { label: tr('Aguja retirada', 'Needle removed'), done: p.needleOut, how: tr('botón «Retirar aguja» o ↓', '“Remove needle” button or ↓') },

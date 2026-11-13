@@ -336,6 +336,18 @@ describe('vía periférica: caso piv_dificil', () => {
     expect(CASES.filter((c) => c.procedure === 'piv').map((c) => c.id)).toEqual(['piv_dificil']);
   });
 
+  it('enlaza los artículos y las fuentes de sus cifras', () => {
+    const { cd } = build('piv_dificil');
+    expect(cd.sources!.length).toBeGreaterThanOrEqual(6);
+    for (const s of cd.sources!) {
+      expect(s.url).toMatch(/^https:\/\//);
+      expect(s.label.length).toBeGreaterThan(20);
+    }
+    // el criterio del 65 % cita su artículo en el caso y en la evaluación
+    expect(cd.sources!.some((s) => s.label.includes('Pandurangadu') && s.url.includes('10.1136/emermed-2017-206803'))).toBe(true);
+    expect(cd.objectives.join(' ')).toContain('Pandurangadu 2018');
+  });
+
   it('la vena diana está en el límite de la regla 3:1:3: ≈ 3 mm con compresor y a 1–1,5 cm', () => {
     const { cd, arm, model } = build('piv_dificil');
     const zone = cd.access!.zone;
@@ -576,6 +588,7 @@ describe('vía periférica: métrica, evaluación y lista de pasos', () => {
     expect(checks.every((c) => c.ok === true)).toBe(true);
     expect(checks.map((c) => c.label).join(' ')).not.toMatch(/anastomosis|arterial \(|venosa|Separación/i);
     expect(checks[1].detail).toContain('68 %');
+    expect(checks[1].label).toContain('Pandurangadu 2018');
   });
 
   it('criterio de longitud: ≥ 65 % del catéter dentro de la vena', () => {

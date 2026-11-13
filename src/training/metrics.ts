@@ -98,7 +98,7 @@ export function pivChecks(o: PivOutcome): FinalCheck[] {
     { label: tr('Catéter en la luz de una vena, con la aguja retirada', 'Catheter in a vein lumen, needle removed'), ok: inVein, detail: where, penalty: 35 },
     {
       // se decide sobre el porcentaje redondeado que se muestra
-      label: tr(`Catéter dentro de la vena ≥ ${CATHETER_MIN_PCT} % de su longitud`, `≥ ${CATHETER_MIN_PCT}% of the catheter inside the vein`),
+      label: tr(`Catéter dentro de la vena ≥ ${CATHETER_MIN_PCT} % de su longitud (Pandurangadu 2018)`, `≥ ${CATHETER_MIN_PCT}% of the catheter inside the vein (Pandurangadu 2018)`),
       ok: inVein && pct !== null ? pct >= CATHETER_MIN_PCT : null,
       detail: inVein && pct !== null ? tr(`${o.inVeinMm.toFixed(0)} de ${o.lengthMm} mm (${pct} %)`, `${o.inVeinMm.toFixed(0)} of ${o.lengthMm} mm (${pct}%)`) : '—',
       penalty: 10,
@@ -118,7 +118,7 @@ export function pivChecks(o: PivOutcome): FinalCheck[] {
       penalty: 3,
     },
     {
-      label: tr('Lavado con suero sin extravasación', 'Saline flush with no extravasation'),
+      label: tr('Lavado con suero sin extravasación (Manual MSD)', 'Saline flush with no extravasation (MSD Manual)'),
       ok: o.flushed,
       detail: o.flushed
         ? o.infiltrations
