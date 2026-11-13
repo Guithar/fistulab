@@ -32,10 +32,15 @@ Al finalizar el itinerario, la persona participante será capaz de:
    - con **abordaje transversal (fuera de plano)**, siguiendo la punta con posicionamiento dinámico (DNTP);
    - con la punta visible durante todo el avance, sin perforar la pared posterior;
    - respetando las distancias (≥ 3 cm de la anastomosis, ≥ 5 cm entre agujas) y la dirección de la aguja venosa.
+7. **Canalizar una vía periférica ecoguiada** en un acceso venoso difícil (sesión opcional, para enfermería de fuera de la unidad de diálisis):
+   - elegir la vena por su diámetro y su profundidad, y distinguirla de la arteria;
+   - tras el reflujo, avanzar 1–2 mm más, deslizar el catéter con la aguja quieta y retirar la aguja;
+   - dejar suficiente catéter dentro de la vena y comprobar la vía con suero;
+   - saber qué venas se preservan en la enfermedad renal.
 
 ## Itinerario propuesto
 
-Seis sesiones de unos 45 minutos cada una.
+Seis sesiones de unos 45 minutos cada una, y una séptima, opcional, de vía periférica ecoguiada.
 
 | Sesión | Contenido | Modo / casos | Evidencia de logro |
 |---|---|---|---|
@@ -45,6 +50,7 @@ Seis sesiones de unos 45 minutos cada una.
 | 4 | Valoración de la FAV | Lecciones 4 y 8; casos *Inmadura* y *Estenosis* | Diámetro ± 0,5 mm; Qa ± 20 %; decidir si la FAV es apta |
 | 5 | Abordaje longitudinal (en plano) | Lección 5; caso *FAV RC madura* | Puntuación ≥ 75; punta visible ≥ 80 % del avance; sin transfixión |
 | 6 | Abordaje transversal (fuera de plano) y casos difíciles | Lección 6; casos *Tortuosa*, *Aneurisma*, *Humerobasílica*, *Prótesis* y *Hematoma* | Puntuación ≥ 75 en 3 casos difíciles |
+| 7 (opcional) | Vía periférica ecoguiada en el acceso venoso difícil | Lección 9; caso *Vía periférica difícil* | Puntuación ≥ 75; ≥ 65 % del catéter dentro de la vena; lavado con suero sin extravasación |
 
 ## Rúbrica de la punción
 
@@ -80,6 +86,18 @@ Criterios finales (al pulsar *Confirmar punción*):
 | Técnica aséptica (piel desinfectada, funda y gel estériles) | −5 |
 | Uso adecuado del compresor | −2 / −5 |
 
+En la **vía periférica** (caso *Vía periférica difícil*) valen los errores de la primera tabla; la infiltración de suero se llama aquí extravasación. Los criterios finales, al pulsar *Confirmar vía*, son otros:
+
+| Criterio | Penalización si no se cumple |
+|---|---|
+| Catéter en la luz de una vena, con la aguja retirada | −35 |
+| ≥ 65 % del catéter dentro de la vena | −10 |
+| Técnica aséptica (piel desinfectada, funda y gel estériles) | −5 |
+| Compresor retirado al terminar | −3 |
+| Lavado con suero sin extravasación | −5 |
+
+El umbral del 65 % procede de un solo estudio observacional (Pandurangadu 2018) y el simulador lo aplica también al catéter de 64 mm; el detalle está en los [fundamentos](FUNDAMENTOS.md), §13.2.
+
 Niveles orientativos:
 
 | Puntuación | Nivel |
@@ -97,12 +115,14 @@ Niveles orientativos:
 - Pide que cada punción se compruebe con un **lavado de suero** (J) antes de confirmarla. Con la punta en la luz se ven microburbujas recorriendo el vaso; si se lava con la punta en la pared (signo de la tienda, antes del «pop»), aparece la infiltración. Es un buen ejercicio para aprender a reconocerla.
 - Empieza en **modo básico** (solo los controles de la punción) y sigue la lista de **pasos de la punción** de la pestaña *Punción*, que se marca sola. El botón **Más controles**, a la derecha de la consola, muestra el Doppler, el PW y los ajustes de imagen para las sesiones 2–4.
 - Pide que lean en la pestaña *Caso* **por qué la punción ecoguiada está indicada** en cada caso (primeras punciones, FAV profunda, maduración escasa, estenosis, hematoma…).
+- En la sesión 7, `https://fistulab.com/?leccion=via-periferica` abre la lección guiada. Recuerda al grupo que el paciente del caso **no tiene enfermedad renal**: en la enfermedad renal crónica avanzada, las venas del antebrazo y del brazo se preservan para la fístula, y el brazo de una fístula no se usa para vías ([fundamentos](FUNDAMENTOS.md), §13.1).
 - Activa **Fusión** (anatomía sobre ecografía) y **Etiquetas** para las primeras sesiones. Desactívalas, junto con las **Ayudas**, en las evaluaciones.
 - El informe (botón **Informe**) se puede imprimir o exportar en JSON o CSV para el portafolio de cada participante. El historial se guarda en el navegador.
 
 ## Limitaciones
 
 - El simulador no reproduce la sensación táctil (resistencia, «pop»), ni la palpación del *thrill*, ni la preparación aséptica real: la asepsia es un paso (botón *Asepsia*) y un criterio de la evaluación.
+- En la vía periférica no se simulan la fijación ni el apósito, la extracción de muestras, las válvulas venosas ni la trombosis de la vena.
 - La anatomía es un modelo idealizado de un adulto. La variabilidad real es mayor.
 - La imagen se genera por convolución con un modelo físico simplificado, pensado para que el aprendizaje transfiera a la práctica, no para cuantificar como un equipo real.
 - Las cifras del simulador (diámetros, flujos, velocidades) son valores didácticos coherentes con la bibliografía. No son valores de referencia normativos.

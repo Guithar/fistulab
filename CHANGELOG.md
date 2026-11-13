@@ -11,6 +11,9 @@
   - pruebas unitarias (máquina de estados del catéter, métrica, evaluación y validez del caso) y variantes `via` y `via-movil` de `tests/e2e-puncion.mjs`.
 - **Guías** en <https://fistulab.com/guias/> y <https://fistulab.com/en/guides/>: tipos de FAV (radiocefálica, humerocefálica, humerobasílica, prótesis y FAV endovascular), mapeo vascular con ecografía antes de la FAV, exploración física (frémito, soplo y maniobras), técnica de punción, punción ecoguiada, cómo distinguir arteria y vena en ecografía, cómo implantar la punción ecoguiada en la unidad (itinerario de formación y rúbrica), estenosis y trombosis de la FAV, punción difícil (FAV profunda, tortuosa, con colaterales, calcificada o tras un hematoma), primeras punciones de una FAV nueva, agujas, regla de los 6 y maduración, Doppler (Qa y estenosis), punción en escalera, área y ojal, infiltración, aneurisma y vía periférica ecoguiada (con la preservación de venas en la enfermedad renal), con referencias y enlaces a los casos del simulador. Páginas de lectura sin JavaScript, enlazadas desde la ayuda y desde «Más» en el móvil.
 - `?leccion=<id>` abre directamente una lección guiada.
+- El paso «reflujo» de la lista de pasos (punción de la FAV y vía periférica) ya no queda marcado al recolocar la aguja tras un intento anterior.
+- El botón *Suero* indica el volumen de cada dispositivo: 10 mL por la aguja de fístula y 5 mL por el catéter periférico.
+- **Guía docente:** sesión 7, opcional, de vía periférica ecoguiada, con su rúbrica.
 - **Revisión clínica** de los fundamentos:
   - la tabla de calibre según el flujo de bomba sigue ahora la de la NKF (17G 200–250 mL/min…);
   - las distancias de las agujas indican en qué difieren las fuentes (GEMAV ≥ 2,5 cm, Castro 3–4 cm, recomendaciones británicas ≥ 5 cm);

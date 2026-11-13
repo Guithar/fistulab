@@ -647,7 +647,8 @@ export class App {
   }
 
   /**
-   * Lava la aguja activa con 10 mL de suero para comprobar la posición de la punta.
+   * Lava con suero para comprobar la posición de la punta: 10 mL por la aguja de fístula y 5 mL por el
+   * catéter periférico (con la aguja ya retirada y el compresor suelto).
    * En la luz: fluye sin resistencia (penacho de microburbujas y chorro en Doppler color).
    * Fuera de la luz: infiltración (colección anecoica que crece alrededor de la punta).
    */

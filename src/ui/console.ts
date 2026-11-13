@@ -6,6 +6,7 @@ import { tr } from '../i18n';
 import { CATHETER_LENGTHS } from '../scene/instruments';
 import { placeDefaults } from '../scene/SceneManager';
 import { SKIN_TONES } from '../scene/room';
+import { FLUSH_ML, PIV_FLUSH_ML } from '../sim/flush';
 import type { MachineSettings } from '../sim/UltrasoundSim';
 import { Bound, button, el, field, group, knob, selectBox, vslider } from './controls';
 
@@ -296,7 +297,16 @@ export function buildConsole(app: App, root: HTMLElement): () => void {
   nCol2.appendChild(adv);
   const cf = el('div', { class: 'crow' });
   const cfB = add(cf, button(tr('Confirmar punción', 'Confirm cannulation'), () => app.confirmPuncture(), { cls: 'primary', title: tr('Evaluar la posición final (Intro)', 'Assess the final position (Enter)') }));
-  add(cf, button(tr('Suero', 'Saline'), () => app.flushNeedle(), { title: tr('Lavar con 10 mL de suero para comprobar la posición de la punta (J): en la luz se ven microburbujas arrastradas por el flujo; fuera, infiltración', 'Flush with 10 mL of saline to check the tip position (J): in the lumen, microbubbles are swept along by the flow; outside it, infiltration') }));
+  // el volumen y el texto dependen del dispositivo: aguja de fístula o catéter periférico
+  const flushTitle = tr(
+    `Lavar con ${FLUSH_ML} mL de suero para comprobar la posición de la punta (J): en la luz se ven microburbujas arrastradas por el flujo; fuera, infiltración`,
+    `Flush with ${FLUSH_ML} mL of saline to check the tip position (J): in the lumen, microbubbles are swept along by the flow; outside it, infiltration`,
+  );
+  const flushTitlePiv = tr(
+    `Lavar con ${PIV_FLUSH_ML} mL de suero por el catéter, con la aguja retirada y el compresor suelto (J): en la vena se ven microburbujas arrastradas por el flujo; fuera, extravasación`,
+    `Flush with ${PIV_FLUSH_ML} mL of saline through the catheter, with the needle removed and the tourniquet released (J): in the vein, microbubbles are swept along by the flow; outside it, extravasation`,
+  );
+  const flB = add(cf, button(tr('Suero', 'Saline'), () => app.flushNeedle(), { title: flushTitle }));
   const rmB = add(cf, button(tr('Retirar aguja', 'Remove needle'), () => app.withdrawNeedle(), { cls: 'danger' }));
   add(cf, button(tr('Realce', 'Enhance'), () => (s().needleEnhance = !s().needleEnhance), { active: () => s().needleEnhance, title: tr('Realce de aguja (angulación del haz hacia la aguja)', 'Needle enhancement (beam steered toward the needle)') })).el.classList.add('adv');
   nCol2.appendChild(cf);
@@ -395,6 +405,7 @@ export function buildConsole(app: App, root: HTMLElement): () => void {
     nrPiv.classList.toggle('hidden', !piv);
     cathBtn.classList.toggle('hidden', !piv);
     cfB.el.textContent = piv ? tr('Confirmar vía', 'Confirm line') : tr('Confirmar punción', 'Confirm cannulation');
+    flB.el.title = piv ? flushTitlePiv : flushTitle;
     rmB.el.textContent = app.needle.needleOut ? tr('Retirar catéter', 'Remove catheter') : tr('Retirar aguja', 'Remove needle');
     rmB.el.title = piv ? tr('Con el catéter deslizado, saca la aguja y deja el catéter; después, retira el catéter', 'With the catheter threaded, takes the needle out and leaves the catheter; after that, removes the catheter') : '';
     gRoom.root.classList.toggle('hidden', m !== 'room');
