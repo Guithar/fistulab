@@ -257,6 +257,9 @@ export class Needle {
     this.tentAmount = 0;
     this.tentStruct = null;
     this.confirmed = false;
+    // el reflujo es de esta colocación: el paso «reflujo» no queda marcado por un intento anterior
+    // (los errores sí se acumulan hasta reiniciar el intento: transfixión, arteria, nervio)
+    this.firstFlashTime = -1;
     this.cath?.reset();
     this.computeGeometry();
   }

@@ -584,6 +584,15 @@ describe('catéter sobre aguja: máquina de estados', () => {
     expect(events).toContain('withdraw');
   });
 
+  it('al recolocar el catéter, el reflujo del intento anterior ya no cuenta', () => {
+    const { n, withdraw } = pivToFlash();
+    expect(n.firstFlashTime).toBeGreaterThanOrEqual(0);
+    withdraw();
+    const { arm } = build('piv_dificil');
+    n.place(arm, n.entryX, n.entryTheta, 0, 45);
+    expect(n.firstFlashTime).toBe(-1);
+  });
+
   it('una aguja de fístula no tiene catéter', () => {
     const n = new Needle('arterial');
     expect(n.cath).toBeNull();
