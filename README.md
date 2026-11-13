@@ -77,6 +77,7 @@ La imagen no es una textura pregrabada. Se calcula en cada fotograma a partir de
 | **Prótesis de PTFE** en asa (doble pared, 45°, sin compresor) | Intermedio |
 | **Hematoma** tras punción fallida | Avanzado |
 | Paciente diabético con **arterias calcificadas** (sombras) | Intermedio |
+| **Vía periférica ecoguiada** en acceso venoso difícil: vena basílica de ≈ 3 mm a 1 cm de profundidad, con catéter sobre aguja (`?caso=piv_dificil`) | Avanzado |
 
 Todos los casos se pueden usar con el brazo izquierdo o el derecho.
 
@@ -110,6 +111,17 @@ Todos los casos se pueden usar con el brazo izquierdo o el derecho.
   - uso correcto del compresor.
 - **Informe** imprimible y exportable (JSON y CSV), con historial guardado en el navegador.
 
+### Vía periférica ecoguiada
+
+El caso «Vía periférica difícil» usa el mismo brazo, la misma sonda y la misma física de aguja, con otro dispositivo y otra evaluación:
+
+- **Catéter sobre aguja** de 22G, 20G o 18G y de 48 o 64 mm, con tres estados: catéter montado en la aguja → **catéter deslizado** sobre ella (tecla `U`; la aguja ya no avanza y el catéter, flexible, sigue la luz de la vena) → **aguja retirada** (queda el catéter). Se ve en 3D y en la ecografía: la aguja de acero con sus reverberaciones y el catéter de plástico como una doble línea.
+- Tras el **reflujo**, la punta del catéter aún no está en la vena (queda por detrás del bisel): hay que avanzar 1–2 mm más. Si no, el catéter no progresa; y si se desliza con la aguja fuera de la luz, queda en el tejido.
+- **Torniquete:** el compresor distiende la vena; se suelta antes de lavar.
+- **Lista de pasos propia** (11 pasos) y **métrica nueva: longitud de catéter dentro de la vena** (mm y % de su longitud).
+- **Evaluación propia:** catéter en la luz de una vena con la aguja retirada, **≥ 65 % del catéter dentro de la vena**, sin punción de la arteria humeral ni contacto con el nervio mediano, sin transfixión, asepsia, compresor retirado y **lavado con suero sin extravasación**. No se aplican los criterios de la fístula (anastomosis, separación entre agujas, aguja arterial o venosa).
+- Las fuentes de cada cifra están en [`docs/FUNDAMENTOS.md` §13](docs/FUNDAMENTOS.md#13-vía-periférica-ecoguiada-catéter-sobre-aguja).
+
 ### Ergonomía (sala)
 
 - Arrastra el ecógrafo y al operador. Ajusta el brazo del paciente (ángulo con el cuerpo, descenso, rotación) y el monitor (giro, inclinación, altura).
@@ -123,7 +135,7 @@ Todos los casos se pueden usar con el brazo izquierdo o el derecho.
 
 ### Aprendizaje
 
-Ocho lecciones guiadas con **comprobación automática** de cada paso:
+Nueve lecciones guiadas con **comprobación automática** de cada paso:
 
 1. Orientación.
 2. Optimización de la imagen.
@@ -133,6 +145,7 @@ Ocho lecciones guiadas con **comprobación automática** de cada paso:
 6. Abordaje transversal (fuera de plano), con posicionamiento dinámico de la punta (DNTP).
 7. Artefactos.
 8. Doppler en la FAV.
+9. Vía periférica ecoguiada (catéter sobre aguja) en acceso venoso difícil.
 
 ### Modo enfoque (escritorio)
 
@@ -153,8 +166,8 @@ En el móvil, la tableta en vertical y las ventanas pequeñas se abre una **inte
 - **Sonda:**
   - un dedo sobre el brazo en 3D lleva la sonda a ese punto; fuera del brazo gira la cámara y con dos dedos se acerca;
   - las maniobras finas (a lo largo, alrededor, girar, inclinar, balanceo, presión) se hacen con una **rueda de ajuste**, igual que la profundidad, la ganancia y el foco.
-- **Punción:** la rueda pasa a controlar el **avance**, el ángulo y el rumbo de la aguja, con botones para la **asepsia** y el **lavado con suero**. Al **confirmar** aparece la evaluación.
-- **Lecciones:** las ocho, con los textos adaptados a los controles táctiles.
+- **Punción:** la rueda pasa a controlar el **avance**, el ángulo y el rumbo de la aguja, con botones para la **asepsia** y el **lavado con suero**. Al **confirmar** aparece la evaluación. En la vía periférica, la rueda desliza también el **catéter** y «Retirar» saca la aguja y lo deja en la vena.
+- **Lecciones:** las nueve, con los textos adaptados a los controles táctiles.
 - **Más ajustes:** caso, brazo, calidad, frecuencia, Doppler completo, aguja, capas del 3D e informe.
 - **Rendimiento:** en móviles y tabletas se dibuja a 30 fps, sin sombras y sin la sala (se puede activar en «Más»).
 - **Instalable:** desde el navegador se puede **añadir a la pantalla de inicio**. Así se abre a pantalla completa y funciona sin conexión después de la primera visita.
@@ -218,14 +231,14 @@ Parámetros de URL útiles:
 
 | Parámetro | Valores |
 |---|---|
-| `?caso=` | `rc_madura`, `bc_obeso`, `rc_estenosis`… |
+| `?caso=` | `rc_madura`, `bc_obeso`, `rc_estenosis`, `piv_dificil`… |
 | `?modo=` | `explore`, `cannulate`, `room`, `learn` |
 | `?calidad=` | `alta`, `media`, `baja` |
 | `?camara=` | vista inicial de la cámara |
 | `?max=` | `3d`, `us`, `anat` (panel maximizado) |
 | `?movil=` | `1` fuerza la interfaz táctil, `0` la de escritorio |
 | `?vista=` | `enfoque` o `cuadricula` en todos los modos (p. ej. para proyectar en clase) |
-| `?leccion=` | abre una lección guiada: `orientacion`, `knobologia`, `arteria-vena`, `madurez`, `eje-largo`, `eje-corto`, `artefactos`, `doppler-fav` |
+| `?leccion=` | abre una lección guiada: `orientacion`, `knobologia`, `arteria-vena`, `madurez`, `eje-largo`, `eje-corto`, `artefactos`, `doppler-fav`, `via-periferica` |
 
 ### Controles principales
 
@@ -240,6 +253,7 @@ Parámetros de URL útiles:
 | Profundidad / ganancia | `+` `−` / `[` `]` |
 | Color / PW / modo B / congelar | `C` / `P` / `B` / `Espacio` |
 | Lavar la aguja con suero | `J` |
+| Vía periférica: deslizar el catéter sobre la aguja | `U` (después, `↓` o «Retirar aguja» saca la aguja) |
 | Medir / etiquetas / invertir I-D / compresor | `M` / `L` / `I` / `K` |
 | Vistas de cámara / modo enfoque / ayuda | `V` / `O` / `H` |
 

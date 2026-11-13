@@ -2,6 +2,13 @@
 
 ## Sin publicar
 
+- **Vía periférica ecoguiada** (catéter venoso periférico en acceso venoso difícil), sobre el mismo brazo y la misma física de aguja:
+  - **catéter sobre aguja** (22G, 20G o 18G; 48 o 64 mm) con tres estados: montado en la aguja, deslizado sobre ella (tecla `U`, botón *▲ Catéter* o *Catéter* en la rueda táctil) y aguja retirada. Tras el reflujo hay que avanzar 1–2 mm más para que entre la punta del catéter; si no, no progresa. Se ve en 3D y en la ecografía (el catéter de plástico, como una doble línea sin reverberaciones);
+  - caso **`piv_dificil`**: paciente con obesidad, venas superficiales finas y vena basílica por encima del codo en el límite de la regla «3:1:3» (2,6 mm, ≈ 3,1 mm con compresor, pared anterior a ≈ 1 cm), con la arteria humeral y el nervio mediano más profundos;
+  - **lista de pasos y evaluación propias**: catéter en la vena con la aguja retirada, **longitud de catéter dentro de la vena** (métrica nueva; criterio ≥ 65 %), sin punción arterial ni contacto nervioso, asepsia, compresor retirado y lavado con suero sin **extravasación**. No se aplican los criterios de la fístula;
+  - **lección 9**, «Vía periférica ecoguiada», con comprobación automática de sus once pasos (`?leccion=via-periferica`), en escritorio y en la interfaz táctil, en español y en inglés;
+  - fundamentos y fuentes en `docs/FUNDAMENTOS.md` §13 (Manual MSD, WikEM, Pandurangadu 2018, Bahl 2020, Fields 2012, Witting 2010);
+  - pruebas unitarias (máquina de estados del catéter, métrica, evaluación y validez del caso) y variantes `via` y `via-movil` de `tests/e2e-puncion.mjs`.
 - **Guías** en <https://fistulab.com/guias/> y <https://fistulab.com/en/guides/>: técnica de punción, punción ecoguiada, agujas, regla de los 6 y maduración, Doppler (Qa y estenosis), punción en escalera, área y ojal, infiltración y aneurisma, con referencias y enlaces a los casos del simulador. Páginas de lectura sin JavaScript, enlazadas desde la ayuda y desde «Más» en el móvil.
 - `?leccion=<id>` abre directamente una lección guiada.
 - **Revisión clínica** de los fundamentos:

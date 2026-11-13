@@ -77,6 +77,7 @@ The image is not a prerecorded texture. It is computed every frame from the anat
 | **PTFE loop graft** (double wall, 45°, no tourniquet) | Intermediate |
 | **Hematoma** after failed cannulation | Advanced |
 | Diabetic patient with **calcified arteries** (shadowing) | Intermediate |
+| **Ultrasound-guided peripheral IV** in difficult venous access: ≈ 3 mm basilic vein 1 cm deep, with an over-the-needle catheter (`?caso=piv_dificil`) | Advanced |
 
 All cases can be used with either the left or the right arm.
 
@@ -110,6 +111,17 @@ All cases can be used with either the left or the right arm.
   - correct tourniquet use.
 - Printable, exportable **report** (JSON and CSV), with the history saved in the browser.
 
+### Ultrasound-guided peripheral IV
+
+The “Difficult peripheral IV” case uses the same arm, the same probe and the same needle physics, with a different device and a different assessment:
+
+- **Over-the-needle catheter**, 22G, 20G or 18G and 48 or 64 mm long, with three states: catheter mounted on the needle → **catheter threaded** over it (`U` key; the needle no longer advances and the flexible catheter follows the vein lumen) → **needle removed** (the catheter stays). It is shown in 3D and on the ultrasound image: the steel needle with its reverberations and the plastic catheter as a double line.
+- After **flashback**, the catheter tip is not in the vein yet (it sits behind the bevel): you must advance 1–2 mm further. Otherwise the catheter will not advance; and if it is slid with the needle outside the lumen, it ends up in the tissue.
+- **Tourniquet:** it distends the vein and is released before flushing.
+- **Its own checklist** (11 steps) and a **new metric: catheter length inside the vein** (mm and % of its length).
+- **Its own assessment:** catheter in a vein lumen with the needle removed, **≥ 65% of the catheter inside the vein**, no brachial artery puncture or median nerve contact, no transfixion, asepsis, tourniquet released and **saline flush with no extravasation**. The fistula criteria (anastomosis, needle separation, arterial or venous needle) do not apply.
+- The source of each figure is in [`docs/en/FUNDAMENTALS.md` §13](docs/en/FUNDAMENTALS.md#13-ultrasound-guided-peripheral-iv-over-the-needle-catheter).
+
 ### Ergonomics (room)
 
 - Drag the ultrasound machine and the operator. Adjust the patient's arm (angle from the body, lowering, rotation) and the monitor (swivel, tilt, height).
@@ -123,7 +135,7 @@ All cases can be used with either the left or the right arm.
 
 ### Learning
 
-Eight guided lessons with **automatic checking** of each step:
+Nine guided lessons with **automatic checking** of each step:
 
 1. Orientation.
 2. Image optimization.
@@ -133,6 +145,7 @@ Eight guided lessons with **automatic checking** of each step:
 6. Short-axis (out-of-plane) approach, with dynamic needle tip positioning (DNTP).
 7. Artifacts.
 8. Doppler of the AVF.
+9. Ultrasound-guided peripheral IV (over-the-needle catheter) in difficult venous access.
 
 ### Focus mode (desktop)
 
@@ -153,8 +166,8 @@ On phones, tablets in portrait orientation, and small windows, a **touch interfa
 - **Probe:**
   - one finger on the 3D arm moves the probe to that point; off the arm, it orbits the camera, and two fingers zoom;
   - fine maneuvers (slide along, slide around, rotate, tilt, rock, pressure) are done with an **adjustment wheel**, as are depth, gain, and focus.
-- **Cannulation:** the wheel controls the needle **advance**, angle, and heading, with buttons for **asepsis** and **saline flush**. When you **confirm**, the assessment appears.
-- **Lessons:** all eight, with the text adapted to touch controls.
+- **Cannulation:** the wheel controls the needle **advance**, angle, and heading, with buttons for **asepsis** and **saline flush**. When you **confirm**, the assessment appears. For the peripheral IV, the wheel also slides the **catheter**, and "Remove" takes the needle out and leaves it in the vein.
+- **Lessons:** all nine, with the text adapted to touch controls.
 - **More settings:** case, arm, quality, frequency, full Doppler, needle, 3D layers, and report.
 - **Performance:** on phones and tablets it renders at 30 fps, without shadows and without the room (it can be enabled under "More").
 - **Installable:** you can **add it to the home screen** from the browser. It then opens full screen and works offline after the first visit.
@@ -218,14 +231,14 @@ Useful URL parameters (the names and values are in Spanish and work on both lang
 
 | Parameter | Values |
 |---|---|
-| `?caso=` | case: `rc_madura`, `bc_obeso`, `rc_estenosis`… |
+| `?caso=` | case: `rc_madura`, `bc_obeso`, `rc_estenosis`, `piv_dificil`… |
 | `?modo=` | `explore`, `cannulate`, `room`, `learn` |
 | `?calidad=` | quality: `alta`, `media`, `baja` (high, medium, low) |
 | `?camara=` | initial camera view |
 | `?max=` | `3d`, `us`, `anat` (maximized panel) |
 | `?movil=` | `1` forces the touch interface, `0` the desktop one |
 | `?vista=` | `enfoque` (focus) or `cuadricula` (grid) in all modes (e.g. for projecting in class) |
-| `?leccion=` | opens a guided lesson: `orientacion`, `knobologia`, `arteria-vena`, `madurez`, `eje-largo`, `eje-corto`, `artefactos`, `doppler-fav` |
+| `?leccion=` | opens a guided lesson: `orientacion`, `knobologia`, `arteria-vena`, `madurez`, `eje-largo`, `eje-corto`, `artefactos`, `doppler-fav`, `via-periferica` |
 
 ### Main controls
 
@@ -240,6 +253,7 @@ Useful URL parameters (the names and values are in Spanish and work on both lang
 | Depth / gain | `+` `−` / `[` `]` |
 | Color / PW / B-mode / freeze | `C` / `P` / `B` / `Space` |
 | Flush the needle with saline | `J` |
+| Peripheral IV: slide the catheter over the needle | `U` (then `↓` or "Remove needle" takes the needle out) |
 | Measure / labels / flip L-R / tourniquet | `M` / `L` / `I` / `K` |
 | Camera views / focus mode / help | `V` / `O` / `H` |
 
