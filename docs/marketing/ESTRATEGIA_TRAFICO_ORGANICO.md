@@ -149,7 +149,7 @@ Las búsquedas de prueba muestran el mismo patrón en casi todos los temas:
   - **regla de los 6 (ES):** «Regla de los 6 de la fístula: cuándo está madura», con las tres cifras en la descripción;
   - **punción ecoguiada (ES):** «Punción ecoguiada de la fístula arteriovenosa paso a paso»;
   - **Doppler (EN):** «AV fistula ultrasound: normal flow volume & stenosis».
-- **Pendiente en Search Console (lo hace Alberto):**
+- **Pendiente en Search Console (lo hace el responsable del proyecto):**
   - pedir la indexación, URL a URL, de las guías en español sin impresiones (infiltración, aneurisma, técnica, escalera y ojal) y de las cuatro guías nuevas en cuanto se publiquen;
   - comprobar en GitHub, en *Settings → Pages*, que está marcado *Enforce HTTPS*, porque Bing ve la portada con `http`.
 - **Próxima revisión:** cuando las páginas lleven 4 semanas publicadas con los títulos nuevos. Hay que comparar el CTR y la posición de las dos guías en inglés y repetir el ajuste con «regla de los 6» si sigue en la posición 8 sin clics.
@@ -181,7 +181,7 @@ Datos de Google desde el 12 de octubre: 8 clics y 897 impresiones. El móvil se 
 3. **Enlaces directos desde la portada** (ES/EN) a las guías sin indexar (técnica, infiltración, aneurisma, escalera y ojal) y al mapeo, para que Google las rastree antes.
 4. **Enlace del Doppler al mapeo**, en los dos idiomas, para que cada consulta llegue a su página.
 
-**Pendiente (Alberto):**
+**Pendiente (responsable del proyecto):**
 - **Publicar:** subir la rama y fusionarla en `main`. Los títulos y las guías nuevas no cuentan hasta entonces.
 - **Pedir la indexación, URL a URL, de:**
   - `https://fistulab.com/en/`
@@ -346,7 +346,7 @@ Exige trabajo de producto: hoy `tr()` solo admite dos idiomas. **Es una decisió
 
 #### I. Línea para pacientes (encargo del 27 de octubre)
 
-Alberto pidió buscar palabras clave y artículos con búsquedas reales para promover el sitio. La sesión de Directorios cruzó Search Console (3 meses), 4 búsquedas de resultados y el repositorio. **No hay volúmenes medidos**: Semrush no tenía unidades. Su conclusión es que hoy todo el contenido es para enfermería y no hay nada para pacientes, que es donde está el volumen de búsqueda.
+Se pidió buscar palabras clave y artículos con búsquedas reales para promover el sitio. La sesión de Directorios cruzó Search Console (3 meses), 4 búsquedas de resultados y el repositorio. **No hay volúmenes medidos**: Semrush no tenía unidades. Su conclusión es que hoy todo el contenido es para enfermería y no hay nada para pacientes, que es donde está el volumen de búsqueda.
 
 Prioridad propuesta, integrada con el mapa anterior. Todas van en español y en inglés salvo que se indique.
 
@@ -397,7 +397,7 @@ Solo del 1 al 3 hay volumen medido. Los tres primeros, salvo el *buttonhole* par
 
 **Requisitos para todo el contenido médico** (de obligado cumplimiento antes de publicar los artículos para pacientes):
 
-- **Autoría y revisión clínica con nombre y titulación,** como `Person` y `reviewedBy` en los datos estructurados, más una página «Comité de revisión». **Pendiente de que Alberto diga quién firma.**
+- **Autoría y revisión clínica con nombre y titulación,** como `Person` y `reviewedBy` en los datos estructurados, más una página «Comité de revisión». **Pendiente de decidir quién firma.**
 - **Fuentes:** KDOQI 2019, GEMAV (SEN/SEDEN), EDTNA/ERCA y ESVS 2018.
 - **En los artículos para pacientes:**
   - sin dosis;
