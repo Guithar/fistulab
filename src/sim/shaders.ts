@@ -168,8 +168,8 @@ uniform float uLambda;      // longitud de onda (mm)
 uniform float uElevFocus;   // foco de elevación (mm)
 uniform float uElevFWHM;    // grosor de corte en el foco (mm)
 uniform vec3 uDopDir;
-uniform vec4 uNdA[2];       // punto posterior (fuera) + radio
-uniform vec4 uNdB[2];       // punta + activo
+uniform vec4 uNdA[4];       // punto posterior (fuera) + radio
+uniform vec4 uNdB[4];       // punta + material (0 = inactivo, 1 = aguja de acero, 2 = catéter de plástico)
 uniform vec4 uTent;         // punta + cantidad de "tienda" (mm)
 uniform vec4 uTentDir;      // dirección de la aguja + índice de estructura
 uniform float uGelMax;
@@ -572,11 +572,14 @@ void main() {
 
   // --- aguja(s): intersección analítica con integración en elevación ---
   if (!air) {
-    for (int n = 0; n < 2; n++) {
+    for (int n = 0; n < 4; n++) {
       if (uNdB[n].w < 0.5) continue;
       vec3 A = uNdA[n].xyz;
       vec3 Tt = uNdB[n].xyz;
       float rn = uNdA[n].w;
+      // catéter de plástico (sin la aguja dentro): refleja menos que el acero, se ven sus dos paredes
+      // como una doble línea y apenas deja sombra
+      bool plastic = uNdB[n].w > 1.5;
       // separación de las reverberaciones internas: el sonido rebota dentro del tubo, entre las caras
       // interiores de la pared anterior y la posterior, así que cuenta la cuerda del haz por la luz de
       // la aguja (diámetro interior ≈ exterior − 0,3 mm, como en flush.ts). Igual para todos los
@@ -626,7 +629,7 @@ void main() {
         // los rayos que tocan el flanco (lejos de la cresta) reflejan hacia fuera: casi no vuelven
         float dAx = rayAxisDist(ro, uB, A, Tt);
         float ridge = exp(-pow(dAx / wr, 2.0));
-        float tipB = 1.0 + 0.9 * exp(-hit.w * 1.4);
+        float tipB = plastic ? 1.0 : 1.0 + 0.9 * exp(-hit.w * 1.4);
         // grosor físico del eco ligado a la longitud de onda (no a la rejilla de la calidad elegida)
         float sdz0 = max(dz * 0.9, 0.3 * uLambda);
         float sdz = max(sdz0, spreadE);
@@ -639,19 +642,24 @@ void main() {
         float ec = exp(-pow((w - s0) / sdz, 2.0));
         // la 1.ª reverberación ~20 dB por debajo del eco de la aguja (0,1 con la aguja plana) y cada
         // una ~8 dB más débil que la anterior (×0,4): sobre la luz anecoica se ven líneas decrecientes
-        for (int m = 1; m <= 5; m++) {
-          float sm = s0 + chordC * float(m);
-          ec += revK * 0.25 * pow(0.4 * revAng, float(m)) * exp(-pow((w - sm) / (sdz * 1.3), 2.0));
+        if (plastic) {
+          // pared posterior del catéter: segunda línea, casi tan brillante como la anterior
+          ec += 0.85 * exp(-pow((w - s0 - chordC) / sdz, 2.0));
+        } else {
+          for (int m = 1; m <= 5; m++) {
+            float sm = s0 + chordC * float(m);
+            ec += revK * 0.25 * pow(0.4 * revAng, float(m)) * exp(-pow((w - sm) / (sdz * 1.3), 2.0));
+          }
         }
         amp += vec2(wgt * ridge * spec * tipB * gN * ec, 0.0);
-        trans += wgt * (w > s0 + sdz ? 0.4 + 0.25 * (1.0 - spec) : 1.0);
+        trans += wgt * (w > s0 + sdz ? (plastic ? 0.9 : 0.4 + 0.25 * (1.0 - spec)) : 1.0);
         if (k == 0 && abs(w - s0) < chordC) centerHit = true;
       }
       // el eco especular de cada rayo de elevación se suma con su peso del haz (sin normalizar:
       // una aguja centrada en el plano devuelve el eco completo); la transmisión sí se promedia
       trans /= wsum;
       needleT *= trans;
-      iq += uNeedleEcho * amp;
+      iq += uNeedleEcho * (plastic ? 0.32 : 1.0) * amp;
       if (centerHit) label = float(TI_NEEDLE);
     }
   }

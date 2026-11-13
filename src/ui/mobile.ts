@@ -9,6 +9,7 @@ import type { App, AppMode } from '../app/App';
 import { OTHER_LANG, otherLangUrl, tr } from '../i18n';
 import { roleLabel } from '../interaction/needle';
 import { canInstall, installApp, isStandalone } from '../pwa';
+import { CATHETER_LENGTHS } from '../scene/instruments';
 import type { CameraPreset } from '../scene/SceneManager';
 import { SITE } from '../site';
 import { IMAGE_PRESETS, presetLabel } from './console';
@@ -28,8 +29,10 @@ interface JogTarget {
   /** píxeles de arrastre por paso */
   stepPx?: number;
   step?(dir: 1 | -1): void;
-  /** teclas que mantienen un movimiento continuo mientras se pulsan − y + */
-  keys?: [string, string];
+  /** teclas que mantienen un movimiento continuo mientras se pulsan − y + (null: ese sentido no existe) */
+  keys?: [string | null, string | null];
+  /** sólo en los casos de vía periférica */
+  piv?: boolean;
 }
 
 type Sheet = 'info' | 'more' | null;
@@ -179,6 +182,8 @@ export class MobileUI {
     const roleUpd = role.update;
     role.update = () => {
       roleUpd();
+      // la vía periférica tiene un solo dispositivo
+      role.el.classList.toggle('hidden', app.isPiv());
       const art = app.activeNeedle === 0;
       role.el.textContent = art ? 'Arterial' : tr('Venosa', 'Venous');
       role.el.classList.toggle('m-art', art);
@@ -187,7 +192,7 @@ export class MobileUI {
     add(this.rowNeedle, button(tr('Fuera de plano', 'Out-of-plane'), () => app.placeNeedleAuto('oop'), { title: tr('Colocar la aguja fuera de plano (eje corto)', 'Place the needle out-of-plane (short axis)') }));
     add(this.rowNeedle, button(tr('En plano', 'In-plane'), () => app.placeNeedleAuto('ip'), { title: tr('Colocar la aguja en plano (eje largo)', 'Place the needle in-plane (long axis)') }));
     add(this.rowNeedle, button(tr('Suero', 'Saline'), () => app.flushNeedle(), { title: tr('Lavar con suero para comprobar la posición de la punta', 'Saline flush to check the tip position') }));
-    add(this.rowNeedle, button(tr('Retirar', 'Remove'), () => app.withdrawNeedle(), { cls: 'danger' }));
+    add(this.rowNeedle, button(tr('Retirar', 'Remove'), () => app.withdrawNeedle(), { cls: 'danger', title: tr('Retirar la aguja; con el catéter deslizado, la aguja sale y el catéter se queda', 'Remove the needle; with the catheter threaded, the needle comes out and the catheter stays') }));
     add(this.rowNeedle, button(tr('Confirmar', 'Confirm'), () => app.confirmPuncture(), { cls: 'primary', title: tr('Evaluar la posición final de la aguja', 'Assess the final needle position') }));
 
     // sonda
@@ -365,6 +370,16 @@ export class MobileUI {
         keys: ['arrowdown', 'arrowup'],
       },
       {
+        // vía periférica: deslizar el catéter sobre la aguja (sólo hacia delante)
+        id: 'cateter',
+        label: tr('Catéter', 'Catheter'),
+        group: 'needle',
+        piv: true,
+        show: () => tr(`${app.metrics.catheterInVein.toFixed(0)} mm en vena`, `${app.metrics.catheterInVein.toFixed(0)} mm in vein`),
+        drag: (px) => px > 0 && app.slideCatheter(px * 0.06),
+        keys: [null, 'u'],
+      },
+      {
         id: 'angulo',
         label: tr('Ángulo', 'Angle'),
         group: 'needle',
@@ -453,7 +468,7 @@ export class MobileUI {
         b.setPointerCapture(e.pointerId);
         if (t.keys) {
           key = t.keys[dir > 0 ? 1 : 0];
-          app.keys.add(key);
+          if (key) app.keys.add(key);
         } else if (t.step) {
           t.step(dir);
           this.showJog();
@@ -493,7 +508,8 @@ export class MobileUI {
 
   private renderChips(cannulating: boolean) {
     const order: JogGroup[] = cannulating ? ['needle', 'probe', 'image'] : ['probe', 'image'];
-    const list = order.flatMap((g) => this.targets.filter((t) => t.group === g && !(cannulating && t.id === 'foco')));
+    const piv = this.app.isPiv();
+    const list = order.flatMap((g) => this.targets.filter((t) => t.group === g && !(cannulating && t.id === 'foco') && (!t.piv || piv)));
     this.chips.innerHTML = '';
     let prev: JogGroup | null = null;
     for (const t of list) {
@@ -571,7 +587,7 @@ export class MobileUI {
     if (!this.active) return;
     const app = this.app;
     const cann = app.needleMode();
-    const sig = `${app.mode}|${cann}`;
+    const sig = `${app.mode}|${cann}|${app.isPiv()}`;
     if (sig !== this.modeSig) {
       this.modeSig = sig;
       this.renderChips(cann);
@@ -677,6 +693,7 @@ export class MobileUI {
       l.appendChild(b.el);
       parent.appendChild(l);
       this.moreBounds.push(b);
+      return l;
     };
     const btnRow = (parent: HTMLElement) => {
       const r = el('div', { class: 'm-row' });
@@ -783,11 +800,34 @@ export class MobileUI {
 
     // aguja
     const cNd = sec(tr('Aguja', 'Needle'));
-    labeled(cNd, tr('Calibre', 'Gauge'), selectBox([['17', '17G'], ['16', '16G'], ['15', '15G'], ['14', '14G']], () => String(app.needle.gauge) as '15', (v) => {
-      app.needle.gauge = parseInt(v);
-      app.scene.resetNeedles();
-    }));
-    labeled(cNd, tr('Longitud', 'Length'), selectBox([['25', '25 mm'], ['32', '32 mm']], () => String(app.needle.length) as '25', (v) => (app.needle.length = parseInt(v))));
+    const fav = [
+      labeled(cNd, tr('Calibre', 'Gauge'), selectBox([['17', '17G'], ['16', '16G'], ['15', '15G'], ['14', '14G']], () => String(app.needle.gauge) as '15', (v) => {
+        app.needle.gauge = parseInt(v);
+        app.scene.resetNeedles();
+      })),
+      labeled(cNd, tr('Longitud', 'Length'), selectBox([['25', '25 mm'], ['32', '32 mm']], () => String(app.needle.length) as '25', (v) => (app.needle.length = parseInt(v)))),
+    ];
+    // vía periférica: calibre y longitud del catéter sobre aguja
+    const pivGauge = selectBox([['22', '22G'], ['20', '20G'], ['18', '18G']], () => String(app.needle.gauge) as '20', (v) => app.setCatheter(parseInt(v), app.needle.cath?.length ?? CATHETER_LENGTHS[0]));
+    const piv = [
+      labeled(cNd, tr('Calibre del catéter', 'Catheter gauge'), pivGauge),
+      labeled(
+        cNd,
+        tr('Longitud del catéter', 'Catheter length'),
+        selectBox(
+          CATHETER_LENGTHS.map((l) => [String(l), `${l} mm`] as [string, string]),
+          () => String(app.needle.cath?.length ?? CATHETER_LENGTHS[0]),
+          (v) => app.setCatheter(app.needle.gauge, parseInt(v)),
+        ),
+      ),
+    ];
+    const gaugeUpd = pivGauge.update;
+    pivGauge.update = () => {
+      gaugeUpd();
+      const on = app.isPiv();
+      for (const l of fav) l.classList.toggle('hidden', on);
+      for (const l of piv) l.classList.toggle('hidden', !on);
+    };
     const rn = btnRow(cNd);
     add(rn, button(tr('Tocar la piel…', 'Tap the skin…'), () => {
       app.placingNeedle = !app.placingNeedle;
@@ -800,7 +840,7 @@ export class MobileUI {
     }, { active: () => app.placingNeedle, title: tr('Elegir el punto de punción tocando la piel', 'Choose the insertion site by tapping the skin') }));
     add(rn, button(tr('Invertir dirección', 'Reverse direction'), () => {
       const n = app.needle;
-      if (n.placed && n.depth > 0) {
+      if (n.inserted) {
         app.toast(tr('Retira la aguja de la piel para invertir su dirección', 'Withdraw the needle from the skin to reverse its direction'), 'warn');
         return;
       }

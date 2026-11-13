@@ -37,6 +37,14 @@ export interface CaseDef {
   };
   probeStart: { x: number; theta: number; rot: number };
   expected?: { diameter?: number; depth?: number; qa?: number; mature?: boolean; note?: string };
+  /**
+   * Procedimiento que se practica: punción de la FAV con agujas de fístula (por defecto) o vía periférica
+   * con catéter sobre aguja ('piv'), que tiene su propia lista de pasos y su propia evaluación.
+   * En 'piv', `access` es la vena diana, su tramo recto y el ángulo de inserción.
+   */
+  procedure?: 'fav' | 'piv';
+  /** profundidad de imagen y foco al cargar el caso (mm); por defecto, 25 y 8 */
+  image?: { depth: number; focus: number };
 }
 
 type P = CtrlPt;
@@ -1507,6 +1515,124 @@ export const CASES: CaseDef[] = [
     access: { veinId: 'fav', anastomosisX: 27, zone: [60, 230], angle: 30 },
     probeStart: { x: 70, theta: 48, rot: 0 },
     expected: { diameter: 6.0, depth: 4.8, qa: 800, mature: true },
+  },
+  {
+    id: 'piv_dificil',
+    title: tr('Vía periférica ecoguiada · acceso venoso difícil', 'Ultrasound-guided peripheral IV · difficult venous access'),
+    short: tr('Vía periférica difícil', 'Difficult peripheral IV'),
+    difficulty: 3,
+    accessType: tr('Sin FAV · catéter venoso periférico sobre aguja', 'No AVF · over-the-needle peripheral IV catheter'),
+    indication: tr(
+      'Acceso venoso difícil: no hay venas visibles ni palpables y ya se ha fallado por referencias anatómicas. Es la situación en la que se recomienda canalizar con ecografía en tiempo real.',
+      'Difficult venous access: no visible or palpable veins, and landmark-based attempts have already failed. This is the situation in which real-time ultrasound guidance is recommended.',
+    ),
+    description: tr(
+      'Paciente con obesidad y sin fístula que necesita una vía periférica. Las venas superficiales del antebrazo son finas (< 2 mm). La mejor diana es la vena basílica por encima del codo, en el límite de lo puncionable según la regla «3:1:3» (al menos 3 mm de diámetro y a 1 cm de profundidad, 1,5 cm como máximo): mide 2,6 mm, llega a unos 3 mm con el compresor y su pared anterior está a 1 cm de la piel. Más profundos discurren la arteria humeral, con sus dos venas, y el nervio mediano. Se canaliza con un catéter sobre aguja: tras el reflujo se avanza 1–2 mm más, se desliza el catéter con la aguja quieta y se retira la aguja.',
+      'Patient with obesity and no fistula who needs a peripheral IV. The superficial forearm veins are thin (< 2 mm). The best target is the basilic vein above the elbow, at the limit of what can be cannulated under the “3:1:3” rule (at least 3 mm in diameter and 1 cm deep, 1.5 cm at most): it measures 2.6 mm, reaches about 3 mm with a tourniquet, and its anterior wall lies 1 cm below the skin. Deeper down run the brachial artery, with its two veins, and the median nerve. It is cannulated with an over-the-needle catheter: after flashback you advance 1–2 mm further, slide the catheter while holding the needle still, and remove the needle.',
+    ),
+    objectives: [
+      tr(
+        'Distinguir la vena de la arteria humeral: la vena se colapsa al presionar con la sonda y la arteria no.',
+        'Tell the vein from the brachial artery: the vein collapses under probe pressure and the artery does not.',
+      ),
+      tr(
+        'Medir el diámetro y la profundidad de la vena con el compresor puesto y valorar si cumple la regla «3:1:3».',
+        'Measure the vein diameter and depth with the tourniquet on and decide whether it meets the “3:1:3” rule.',
+      ),
+      tr(
+        'Canalizar la vena: reflujo, avanzar 1–2 mm más, deslizar el catéter sobre la aguja y retirar la aguja.',
+        'Cannulate the vein: flashback, advance 1–2 mm further, slide the catheter over the needle and remove the needle.',
+      ),
+      tr(
+        'Dejar al menos el 65 % del catéter dentro de la vena y comprobar con suero que no hay extravasación.',
+        'Leave at least 65% of the catheter inside the vein and check with saline that there is no extravasation.',
+      ),
+    ],
+    findings: [
+      tr(
+        'Vena basílica ≈ 2,6 mm sin compresor y ≈ 3,1 mm con él; pared anterior a ≈ 10,5 mm de la piel.',
+        'Basilic vein ≈ 2.6 mm without a tourniquet and ≈ 3.1 mm with it; anterior wall ≈ 10.5 mm below the skin.',
+      ),
+      tr(
+        'Con el catéter de 48 mm y 40–45° quedan dentro de la vena ≈ 32–33 mm (66–69 %); con 35° o menos el trayecto hasta la vena es más largo y no se llega al 65 %. El de 64 mm deja más margen (≈ 77 % con 45°).',
+        'With the 48 mm catheter at 40–45°, ≈ 32–33 mm (66–69%) end up inside the vein; at 35° or less the path to the vein is longer and 65% is not reached. The 64 mm catheter leaves more margin (≈ 77% at 45°).',
+      ),
+      tr(
+        'Arteria humeral (pulsátil, no se colapsa) y nervio mediano (patrón en panal), más profundos que la vena: una punción demasiado profunda puede alcanzarlos.',
+        'Brachial artery (pulsatile, does not collapse) and median nerve (honeycomb pattern), deeper than the vein: too deep a puncture can reach them.',
+      ),
+    ],
+    tips: [
+      tr(
+        'Ajusta la profundidad de la imagen a unas dos veces la profundidad de la vena.',
+        'Set the image depth to about twice the depth of the vein.',
+      ),
+      tr(
+        'En transversal, entra a una distancia de la sonda igual a la profundidad de la vena, con unos 45°.',
+        'In short axis, enter the skin at a distance from the probe equal to the vein depth, at about 45°.',
+      ),
+      tr(
+        'No te pares en el reflujo: la punta del catéter queda por detrás del bisel de la aguja.',
+        'Do not stop at flashback: the catheter tip sits behind the needle bevel.',
+      ),
+      tr(
+        'Si el catéter no se desliza con facilidad, no está en la vena: no lo fuerces.',
+        'If the catheter does not slide easily, it is not in the vein: do not force it.',
+      ),
+    ],
+    armOpts: { fatAdd: 9, sizeScale: 1.03 },
+    hr: 84,
+    procedure: 'piv',
+    image: { depth: 30, focus: 12 },
+    build: (arm) => {
+      // venas superficiales finas: no sirven para la vía
+      const thin = (pts: P[], r: number) => pts.map((p) => ({ ...p, r: Math.min(p.r, r) }));
+      const defs = base(arm, { skipCephalic: true, skipBasilic: true }).map((d) => (d.id === 'v_mediana_ab' || d.id === 'v_mediana_cubital' ? { ...d, pts: thin(d.pts, 0.6), flow: { q: 4, wave: 'vein' as const } } : d));
+      defs.push(
+        {
+          id: 'v_cefalica',
+          name: tr('Vena cefálica', 'Cephalic vein'),
+          short: tr('V. cefálica', 'Cephalic v.'),
+          kind: 'vein',
+          group: 'vena',
+          pts: thin(CEPHALIC_PTS, 0.75),
+          flow: { q: 8, wave: 'vein' },
+          pressure: 7,
+        },
+        {
+          // la diana: ≈ 2,6 mm (3,1 mm con compresor), con el centro a 12 mm de la piel entre el codo y el tercio medio del brazo
+          id: 'v_basilica',
+          name: tr('Vena basílica', 'Basilic vein'),
+          short: tr('V. basílica', 'Basilic v.'),
+          kind: 'vein',
+          group: 'vena',
+          isAccess: true,
+          pts: [
+            { x: -15, th: -80, d: 3, ref: 'skin', r: 0.7 },
+            { x: 60, th: -78, d: 3.8, ref: 'skin', r: 0.75 },
+            { x: 150, th: -70, d: 5.5, ref: 'skin', r: 0.9 },
+            { x: 230, th: -60, d: 8.5, ref: 'skin', r: 1.15 },
+            { x: 285, th: -57, d: 11.5, ref: 'skin', r: 1.3 },
+            { x: 330, th: -58, d: 12, ref: 'skin', r: 1.3 },
+            { x: 380, th: -61, d: 12.2, ref: 'skin', r: 1.3 },
+            { x: 430, th: -66, d: 1.5, ref: 'fascia', r: 1.6 },
+            { x: 500, th: -74, d: 5, ref: 'fascia', r: 1.9 },
+            { x: 580, th: -82, d: 7, ref: 'fascia', r: 2.2 },
+          ],
+          flow: { q: 30, wave: 'vein' },
+          pressure: 7,
+        },
+      );
+      return defs;
+    },
+    access: { veinId: 'v_basilica', zone: [295, 375], angle: 45 },
+    // la sonda empieza entre la vena y el paquete humeral: hay que localizar la vena y centrarla
+    probeStart: { x: 335, theta: -45, rot: 0 },
+    expected: {
+      diameter: 3.1,
+      depth: 10.5,
+      note: tr('Diámetro con compresor (2,6 mm sin él). Vena en el límite de la regla «3:1:3».', 'Diameter with a tourniquet (2.6 mm without). Vein at the limit of the “3:1:3” rule.'),
+    },
   },
 ];
 

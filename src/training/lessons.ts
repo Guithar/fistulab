@@ -478,4 +478,107 @@ export const LESSONS: Lesson[] = [
       },
     ],
   },
+  {
+    id: 'via-periferica',
+    title: tr('9. Vía periférica ecoguiada (catéter sobre aguja)', '9. Ultrasound-guided peripheral IV (over-the-needle catheter)'),
+    caseId: 'piv_dificil',
+    mode: 'cannulate',
+    summary: tr(
+      'Acceso venoso difícil: elegir la vena, canalizarla con un catéter sobre aguja, dejar suficiente catéter dentro y comprobar la vía.',
+      'Difficult venous access: choose the vein, cannulate it with an over-the-needle catheter, leave enough catheter inside and check the line.',
+    ),
+    steps: [
+      {
+        text: tr(
+          'Paciente sin venas visibles ni palpables. Localiza la <b>vena basílica</b> por encima del codo en <b>transversal</b> {{(tecla 1)|(botón <b>Transv.</b>)}} y céntrala en la imagen (±4 mm). La profundidad de la imagen debe ser unas dos veces la de la vena.',
+          'Patient with no visible or palpable veins. Find the <b>basilic vein</b> above the elbow in <b>short axis</b> {{(key 1)|(<b>Short</b> button)}} and center it in the image (±4 mm). The image depth should be about twice the depth of the vein.',
+        ),
+        check: (c) => {
+          const v = nearAccess(c);
+          return !!v && !v.along && Math.abs(v.u) < 4;
+        },
+        hint: tr(
+          '{{El botón ◎ de la consola centra la sonda sobre la vena.|El botón <b>Centrar</b> lleva la sonda sobre la vena.}}',
+          '{{The ◎ button on the console centers the probe over the vein.|The <b>Center</b> button brings the probe over the vein.}}',
+        ),
+      },
+      {
+        text: tr(
+          '¿Vena o arteria? Aumenta la <b>presión</b> de la sonda {{(tecla X)|(<b>Presión</b> en la rueda)}}: la vena se <b>colapsa</b>; la arteria humeral, más profunda, sigue redonda y pulsátil. A su lado está el nervio mediano (patrón en panal).',
+          'Vein or artery? Increase the probe <b>pressure</b> {{(key X)|(<b>Pressure</b> on the wheel)}}: the vein <b>collapses</b>; the brachial artery, deeper down, stays round and pulsatile. Next to it lies the median nerve (honeycomb pattern).',
+        ),
+        check: (c) => c.collapse(c.access()?.def.id ?? '') > 0.6,
+        hint: tr(
+          'Con el compresor puesto la vena está distendida y no se colapsa: si lo tienes aplicado, suéltalo antes.',
+          'With the tourniquet on, the vein is distended and will not collapse: if it is applied, release it first.',
+        ),
+      },
+      {
+        text: tr(
+          'Suelta la presión {{(tecla Z)|}}, aplica el <b>compresor</b> {{(K)|(botón <b>Compresor</b>)}} y mide con {{el calibre (M)|<b>Medir</b>}} la <b>profundidad</b> (de la piel a la pared anterior) y el <b>diámetro</b>. Regla «3:1:3»: al menos 3 mm de diámetro y a 1 cm de profundidad (1,5 cm como máximo).',
+          'Release the pressure {{(key Z)|}}, apply the <b>tourniquet</b> {{(K)|(<b>Tourniquet</b> button)}} and use {{the caliper (M)|<b>Measure</b>}} to measure the <b>depth</b> (skin to anterior wall) and the <b>diameter</b>. “3:1:3” rule: at least 3 mm in diameter and 1 cm deep (1.5 cm at most).',
+        ),
+        check: (c) => c.tourniquet && c.calipers.filter((k) => !!k.b).length >= 2,
+      },
+      {
+        text: tr(
+          'Prepara la <b>asepsia</b>: piel desinfectada, funda estéril en la sonda y gel estéril de un solo uso (botón <b>Asepsia</b>).',
+          'Set up <b>asepsis</b>: disinfected skin, sterile probe cover and single-use sterile gel (<b>Asepsis</b> button).',
+        ),
+        check: (c) => c.asepsis,
+      },
+      {
+        text: tr(
+          'Coloca el <b>catéter sobre aguja</b>: pulsa {{<b>N</b> o un botón de abordaje|<b>Fuera de plano</b> o <b>En plano</b>}}. En transversal entra a una distancia de la sonda igual a la profundidad de la vena, con unos 45°.',
+          'Place the <b>over-the-needle catheter</b>: press {{<b>N</b> or an approach button|<b>Out-of-plane</b> or <b>In-plane</b>}}. In short axis it enters the skin at a distance from the probe equal to the vein depth, at about 45°.',
+        ),
+        check: (c) => !!c.needle()?.placed,
+      },
+      {
+        text: tr(
+          'Avanza {{(↑ o rueda)|(<b>Avance</b> en la rueda)}} siguiendo la punta: la pared anterior se <b>indenta</b> y cede, y aparece el <b>reflujo</b> en la cámara de la aguja.',
+          'Advance {{(↑ or mouse wheel)|(<b>Advance</b> on the wheel)}} while following the tip: the anterior wall <b>indents</b> and gives way, and <b>flashback</b> appears in the needle chamber.',
+        ),
+        check: (c) => c.needle()?.state === 'luz' && c.needle()?.inVessel?.def.kind === 'vein',
+      },
+      {
+        text: tr(
+          'No te pares en el reflujo: la punta del catéter queda por detrás del bisel. Avanza <b>1–2 mm más</b> {{(Mayús + ↑, movimiento fino)|}}, sin tocar la pared posterior, hasta que la <b>punta del catéter</b> esté dentro de la vena.',
+          'Do not stop at flashback: the catheter tip sits behind the bevel. Advance <b>1–2 mm further</b> {{(Shift + ↑, fine movement)|}}, without touching the back wall, until the <b>catheter tip</b> is inside the vein.',
+        ),
+        check: (c) => !!c.needle()?.catheterTipInLumen(c.model),
+      },
+      {
+        text: tr(
+          'Con la aguja quieta, <b>desliza el catéter</b> sobre ella {{(tecla <b>U</b> o botón <b>▲ Catéter</b>)|(<b>Catéter</b> en la rueda)}} hasta el cono. Debe entrar sin resistencia: si no progresa, no está en la vena.',
+          'Holding the needle still, <b>slide the catheter</b> over it {{(<b>U</b> key or <b>▲ Catheter</b> button)|(<b>Catheter</b> on the wheel)}} up to the hub. It should go in without resistance: if it will not advance, it is not in the vein.',
+        ),
+        check: (c) => {
+          const k = c.needle()?.cath;
+          return !!k && k.stage !== 'montado' && !k.outside && k.full;
+        },
+      },
+      {
+        text: tr(
+          '<b>Retira la aguja</b> {{(botón <b>Retirar aguja</b> o ↓)|(botón <b>Retirar</b>)}}. El catéter queda en la vena: en la imagen es una doble línea fina, sin la sombra ni las reverberaciones del acero.',
+          '<b>Remove the needle</b> {{(<b>Remove needle</b> button or ↓)|(<b>Remove</b> button)}}. The catheter stays in the vein: on the image it is a thin double line, without the shadow or the reverberations of steel.',
+        ),
+        check: (c) => !!c.needle()?.needleOut,
+      },
+      {
+        text: tr(
+          'Suelta el <b>compresor</b> {{(K)|}} y <b>lava con suero</b> {{(J o botón <b>Suero</b>)|(botón <b>Suero</b>)}}: debe entrar sin resistencia y las microburbujas recorren la vena. Si el suero se acumula alrededor de la vena hay <b>extravasación</b>: retira el catéter y canaliza en otro punto.',
+          'Release the <b>tourniquet</b> {{(K)|}} and <b>flush with saline</b> {{(J or <b>Saline</b> button)|(<b>Saline</b> button)}}: it should flow without resistance and the microbubbles travel along the vein. If saline pools around the vein there is <b>extravasation</b>: remove the catheter and cannulate at another site.',
+        ),
+        check: (c) => !c.tourniquet && !!c.needle()?.cath?.flushed,
+      },
+      {
+        text: tr(
+          '<b>Confirma</b> la vía {{(Intro)|}}. Se evalúa, sobre todo, cuánto catéter queda <b>dentro de la vena</b>: con al menos el 65 % de su longitud dentro, la vía dura más; con menos del 30 %, falla.',
+          '<b>Confirm</b> the line {{(Enter)|}}. Above all, the assessment looks at how much catheter lies <b>inside the vein</b>: with at least 65% of its length inside, the line lasts longer; with less than 30%, it fails.',
+        ),
+        check: (c) => !!c.needle()?.confirmed,
+      },
+    ],
+  },
 ];

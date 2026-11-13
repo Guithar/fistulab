@@ -4,6 +4,7 @@
  *
  * Basado en: Moyano Franco MJ, Salgueira Lazo M, Roca-Tey R. Punción ecoguiada del acceso vascular
  * para hemodiálisis (Nefrología al día); GEMAV 2017; procedimientos SEDEN 3.3 y 3.4.
+ * La vía periférica ecoguiada tiene su propia lista (`pivChecklist`).
  */
 import { tr } from '../i18n';
 
@@ -28,6 +29,22 @@ export interface ChecklistState {
   angleToVessel: number | null;
   flushes: number;
   confirmed: boolean;
+  /** vía periférica ecoguiada (catéter sobre aguja): si está, la lista es la de este procedimiento */
+  piv?: PivChecklistState;
+}
+
+export interface PivChecklistState {
+  /** compresor aplicado en el momento de la punción (antes de puncionar, el estado actual) */
+  tourniquetAtPuncture: boolean;
+  /** la punta del catéter, y no solo el bisel de la aguja, está en la luz */
+  catheterTipInVein: boolean;
+  /** % del catéter dentro de la vena (null si no está en una vena) */
+  inVeinPct: number | null;
+  /** el catéter se ha deslizado sobre la aguja por la luz de la vena */
+  threaded: boolean;
+  needleOut: boolean;
+  /** lavado con suero correcto con el catéter ya colocado */
+  flushed: boolean;
 }
 
 export interface ChecklistItem {
@@ -56,7 +73,69 @@ export function zoneOk(s: Pick<ChecklistState, 'probeX' | 'access' | 'otherTipX'
   return s.otherTipX === null || Math.abs(x - s.otherTipX) >= 50;
 }
 
+/**
+ * Pasos de la vía periférica ecoguiada con catéter sobre aguja, en el orden del Manual MSD
+ * («How To Do Ultrasound-Guided Peripheral Intravenous Catheter Insertion»): compresor, asepsia, reflujo,
+ * avanzar 1–2 mm más para que entre la punta del catéter, deslizar el catéter con la aguja quieta, retirar
+ * la aguja, soltar el compresor y lavar con suero. La longitud de catéter dentro de la vena (≥ 65 %) es de
+ * Pandurangadu 2018.
+ */
+export function pivChecklist(s: ChecklistState): ChecklistItem[] {
+  const p = s.piv!;
+  return [
+    {
+      label: tr('Brazo apoyado y relajado (≈ 45° del cuerpo)', 'Arm supported and relaxed (≈ 45° from the body)'),
+      done: armPositionOk(s.armAngle, s.armPitch),
+      how: tr(
+        `sobre una superficie firme y plana (ahora ${Math.round(s.armAngle)}°) · Sala y ergonomía`,
+        `on a firm, flat surface (now ${Math.round(s.armAngle)}°) · Room &amp; ergonomics`,
+      ),
+    },
+    {
+      label: tr('Vena localizada y medida', 'Vein located and measured'),
+      done: s.measures >= 2,
+      how: tr(
+        'en transversal (1): se colapsa al presionar y la arteria no; profundidad y diámetro con el calibre (M)',
+        'in short axis (1): it collapses under pressure and the artery does not; depth and diameter with the caliper (M)',
+      ),
+    },
+    { label: tr('Compresor aplicado', 'Tourniquet applied'), done: p.tourniquetAtPuncture, how: tr('proximal al punto de punción (K): la vena se distiende', 'proximal to the insertion site (K): the vein distends') },
+    {
+      label: tr('Asepsia', 'Asepsis'),
+      done: s.asepsis,
+      how: tr('piel desinfectada, funda y gel estériles · botón Asepsia', 'disinfected skin, sterile cover and gel · Asepsis button'),
+    },
+    {
+      label: tr('Catéter sobre aguja colocado', 'Catheter-over-needle placed'),
+      done: s.placed,
+      how: tr('sonda en una mano, catéter en la otra · N o los botones de abordaje', 'probe in one hand, catheter in the other · N or the approach buttons'),
+    },
+    { label: tr('Punta de la aguja en la vena (reflujo)', 'Needle tip in the vein (flashback)'), done: s.flashed, how: tr('↑ siguiendo la punta en la pantalla', '↑ following the tip on the screen') },
+    {
+      label: tr('Punta del catéter en la vena', 'Catheter tip in the vein'),
+      done: p.catheterTipInVein,
+      how: tr('tras el reflujo, avanza 1–2 mm más (Mayús + ↑): el catéter queda por detrás del bisel', 'after flashback, advance 1–2 mm further (Shift + ↑): the catheter sits behind the bevel'),
+    },
+    {
+      label: tr('Catéter deslizado en la vena (≥ 65 % dentro)', 'Catheter threaded into the vein (≥ 65% inside)'),
+      done: p.threaded && p.inVeinPct !== null && p.inVeinPct >= 65,
+      how: tr(
+        `con la aguja quieta, desliza el catéter hasta el cono (U)${p.inVeinPct !== null ? ` · ahora ${p.inVeinPct} %` : ''}`,
+        `holding the needle still, slide the catheter up to the hub (U)${p.inVeinPct !== null ? ` · now ${p.inVeinPct}%` : ''}`,
+      ),
+    },
+    { label: tr('Aguja retirada', 'Needle removed'), done: p.needleOut, how: tr('botón «Retirar aguja» o ↓', '“Remove needle” button or ↓') },
+    {
+      label: tr('Compresor retirado y lavado con suero', 'Tourniquet released and saline flush'),
+      done: !s.tourniquet && p.flushed,
+      how: tr('suelta el compresor (K) y lava (J): el suero debe entrar sin extravasación', 'release the tourniquet (K) and flush (J): saline must flow with no extravasation'),
+    },
+    { label: tr('Vía confirmada', 'Line confirmed'), done: s.confirmed, how: tr('Intro', 'Enter') },
+  ];
+}
+
 export function procedureChecklist(s: ChecklistState): ChecklistItem[] {
+  if (s.piv) return pivChecklist(s);
   const graft = !!s.access?.graft;
   return [
     {

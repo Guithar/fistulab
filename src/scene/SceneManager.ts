@@ -41,7 +41,7 @@ import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment
 import type { AnatomyModel } from '../anatomy/model';
 import { buildSkinGeometry, fasciaTube } from './armMesh';
 import { AnatomyMeshes, buildAnatomyMeshes, FlowParticles } from './anatomyMeshes';
-import { buildNeedle, buildProbe, NeedleMesh, ProbeMesh } from './instruments';
+import { buildCatheterNeedle, buildNeedle, buildProbe, NeedleMesh, ProbeMesh } from './instruments';
 import { armBoard, armMatrix, armPlacement, ArmPlacement, buildRoom, IndentUniforms, patchIndent, Room, skinMaterial, SKIN_TONES } from './room';
 import type { ProbePose } from '../sim/UltrasoundSim';
 
@@ -86,6 +86,8 @@ export interface NeedleVisual {
   flash: number;
   arterialBlood: boolean;
   visible: boolean;
+  /** catéter sobre aguja: longitud del catéter (mm), su trayecto del cono a la punta y si la aguja sigue dentro */
+  catheter?: { length: number; path: Vector3[]; needleIn: boolean };
 }
 
 export interface RoomConfig {
@@ -415,7 +417,7 @@ export class SceneManager {
   updateNeedles(list: NeedleVisual[]) {
     while (this.needles.length < list.length) {
       const nv = list[this.needles.length];
-      const nm = buildNeedle(nv.gauge, 25, nv.role);
+      const nm = nv.catheter ? buildCatheterNeedle(nv.gauge, nv.catheter.length) : buildNeedle(nv.gauge, 25, nv.role);
       this.needles.push(nm);
       this.armGroup.add(nm.group);
     }
@@ -437,9 +439,12 @@ export class SceneManager {
       const Ya = new Vector3().crossVectors(back, Xa).normalize();
       const m = new Matrix4().makeBasis(Xa, Ya, back);
       m.setPosition(nv.tip);
-      nm.group.matrixAutoUpdate = false;
-      nm.group.matrix.copy(m);
-      nm.group.matrixWorldNeedsUpdate = true;
+      // el catéter se dibuja en coordenadas del brazo: sólo su aguja sigue la punta y la dirección
+      const ng = nm.needleGroup ?? nm.group;
+      ng.matrixAutoUpdate = false;
+      ng.matrix.copy(m);
+      ng.matrixWorldNeedsUpdate = true;
+      if (nv.catheter) nm.setCatheter?.(nv.catheter.path, nv.catheter.needleIn);
       nm.setFlash(nv.flash, nv.arterialBlood);
     }
   }
