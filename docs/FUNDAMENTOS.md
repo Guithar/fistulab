@@ -487,7 +487,7 @@ El caso «Vía periférica difícil» (`piv_dificil`) y la lección 9 usan el mi
 29. Midwest Kidney Network, protocolo de punción de una FAV nueva.
 30. Castro MCM et al. *Braz J Nephrol* 2020;42:38–46.
 31. KQuIP. Clinical guidelines for cannulation of AVF/AVG, 2016.
-74. VASBI y British Renal Society Vascular Access SIG. Clinical Practice Recommendations for Needling of Arteriovenous Fistulae and Grafts for Haemodialysis, 2018. https://www.thinkkidneys.nhs.uk/kquip/wp-content/uploads/sites/5/2018/10/Clinical-Practice-Recommendations-for-Needling-of-Arteriovenous-Fistulae-and-Grafts-for-Haemodialysis.pdf
+74. VASBI y British Renal Society Vascular Access SIG. Clinical Practice Recommendations for Needling of Arteriovenous Fistulae and Grafts for Haemodialysis, 2018. Copia archivada: https://web.archive.org/web/20210625093514/https://www.thinkkidneys.nhs.uk/kquip/wp-content/uploads/sites/5/2018/10/Clinical-Practice-Recommendations-for-Needling-of-Arteriovenous-Fistulae-and-Grafts-for-Haemodialysis.pdf (el enlace original, en thinkkidneys.nhs.uk, ya no funciona).
 
 ### Punción ecoguiada
 

@@ -487,7 +487,7 @@ The “Difficult peripheral IV” case (`piv_dificil`) and lesson 9 use the same
 29. Midwest Kidney Network, new AVF cannulation protocol.
 30. Castro MCM et al. *Braz J Nephrol* 2020;42:38–46.
 31. KQuIP. Clinical guidelines for cannulation of AVF/AVG, 2016.
-74. VASBI and British Renal Society Vascular Access SIG. Clinical Practice Recommendations for Needling of Arteriovenous Fistulae and Grafts for Haemodialysis, 2018. https://www.thinkkidneys.nhs.uk/kquip/wp-content/uploads/sites/5/2018/10/Clinical-Practice-Recommendations-for-Needling-of-Arteriovenous-Fistulae-and-Grafts-for-Haemodialysis.pdf
+74. VASBI and British Renal Society Vascular Access SIG. Clinical Practice Recommendations for Needling of Arteriovenous Fistulae and Grafts for Haemodialysis, 2018. Archived copy: https://web.archive.org/web/20210625093514/https://www.thinkkidneys.nhs.uk/kquip/wp-content/uploads/sites/5/2018/10/Clinical-Practice-Recommendations-for-Needling-of-Arteriovenous-Fistulae-and-Grafts-for-Haemodialysis.pdf (the original link, at thinkkidneys.nhs.uk, no longer works).
 
 ### Ultrasound-guided cannulation
 
